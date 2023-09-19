@@ -1,0 +1,3 @@
+Animation slime_animate tmp/slime_red.png 5 0
+Animation grass_top tmp/grass_top.png 1 0
+Animation grass_top_left tmp/grass_top_left.png 1 0

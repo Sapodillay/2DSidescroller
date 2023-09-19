@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+packages/*
+.vs/*
+VoidGame/x64/*
+x64/*
