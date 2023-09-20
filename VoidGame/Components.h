@@ -60,19 +60,21 @@ public:
 	float height = 0;
 	float width = 0;
 	CCollision() {}
-	CCollision(float r) : radius(r)
-	{
-
-	}
-
-	CCollision(float h, float w) : height(h), width(w)
-	{
-
-
-	}
-
-
+	CCollision(float r) : radius(r) {}
+	CCollision(float h, float w) : height(h), width(w) {}
 };
+
+class CBoundingBox : public Component
+{
+public:
+	Vec2 size;
+	Vec2 halfSize;
+
+	CBoundingBox() {}
+	CBoundingBox(const Vec2& s) : size(s), halfSize(s.x / 2, s.y / 2) {}
+};
+
+
 
 class CScore : public Component
 {
