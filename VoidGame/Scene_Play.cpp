@@ -58,7 +58,8 @@ void Scene_Play::loadLevel(std::string& filename)
     auto tile = m_entityManager.addEntity("Tile");
     tile->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top_left"), true);
     tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-    tile->addComponent<CTransform>(gridToMidPixel(Vec2(0, 0), tile));
+    tile->addComponent<CTransform>(gridToMidPixel(Vec2(0, 11), tile));
+    tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
 
 
     for (int i = 1; i < 20; i++)
@@ -66,7 +67,8 @@ void Scene_Play::loadLevel(std::string& filename)
         auto e = m_entityManager.addEntity("Tile");
         e->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top"), true);
         e->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-        e->addComponent<CTransform>(gridToMidPixel(Vec2(i, 0), e));
+        e->addComponent<CTransform>(gridToMidPixel(Vec2(i, 11), e));
+        e->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
     }
 
 
@@ -82,6 +84,8 @@ void Scene_Play::spawnPlayer()
     m_player->addComponent<CInput>();
 
     animation.m_animation.setSize(m_gridSize);
+
+    m_player->addComponent<CBoundingBox>(animation.m_animation.getSize());
 
     //align to grid
     m_player->getComponent<CTransform>().pos = gridToMidPixel(Vec2(3, 3), m_player);
@@ -141,6 +145,24 @@ void Scene_Play::sLifespan()
 
 void Scene_Play::sCollision()
 {
+
+
+    //Player collision with tiles.
+
+
+    for (auto& e : m_entityManager.getEntities())
+    {
+
+
+
+
+
+
+    }
+
+
+
+
 }
 
 void Scene_Play::sDoAction(const Action& action)
@@ -158,14 +180,15 @@ void Scene_Play::sDoAction(const Action& action)
     {
         std::string name = action.getName();
 
-        if      (name == "UP")      { input.up = true; }
-        else if (name == "LEFT")    { input.left = true; }
-        else if (name == "RIGHT")   { input.right = true; }
-        else if (name == "DOWN")    { input.down = true; }
-        else if (name == "SHOOT")   {}// shoot logic
+        if (name == "UP") { input.up = true; }
+        else if (name == "LEFT") { input.left = true; }
+        else if (name == "RIGHT") { input.right = true; }
+        else if (name == "DOWN") { input.down = true; }
+        else if (name == "SHOOT") {}// shoot logic
 
 
         else if (name == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
+        else if (name == "TOGGLE_COLLISION") { m_drawCollision = !m_drawCollision; }
     }
     else if (action.getType() == "END")
     {
@@ -247,6 +270,33 @@ void Scene_Play::sRender()
             xTile++;
         }
 
+    }
+
+    if (m_drawCollision)
+    {
+
+        for (auto& e : m_entityManager.getEntities())
+        {
+            if (e->hasComponent<CBoundingBox>())
+            {
+                CBoundingBox& boundingBox = e->getComponent<CBoundingBox>();
+                CTransform& transform = e->getComponent<CTransform>();
+                sf::RectangleShape rectShape;
+
+                //set shape to size of bound
+                rectShape.setSize({boundingBox.size.x, boundingBox.size.y});
+                rectShape.setOrigin({ boundingBox.halfSize.x, boundingBox.halfSize.y });
+                rectShape.setPosition({ transform.pos.x, transform.pos.y});
+
+                //set color
+                rectShape.setOutlineColor(sf::Color::Red);
+                rectShape.setOutlineThickness(2.0f);
+                rectShape.setFillColor(sf::Color::Transparent);
+                //draw shape
+                m_game->window().draw(rectShape);
+
+            }
+        }
     }
 
 
