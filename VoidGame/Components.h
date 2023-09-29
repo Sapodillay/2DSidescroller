@@ -69,6 +69,7 @@ class CBoundingBox : public Component
 public:
 	Vec2 size;
 	Vec2 halfSize;
+	sf::Color debugColor = sf::Color::Red;
 
 	CBoundingBox() {}
 	CBoundingBox(const Vec2& s) : size(s), halfSize(s.x / 2, s.y / 2) {}
