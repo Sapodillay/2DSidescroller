@@ -1,6 +1,7 @@
 #include "Scene_Play.h"
 #include "GameEngine.h"
 #include <SFML/Graphics.hpp>
+#include "Physics.h"
 #include <iostream>
 
 Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath)
@@ -19,6 +20,14 @@ void Scene_Play::init(std::string& levelPath)
     registerAction(sf::Keyboard::A, "LEFT");
     registerAction(sf::Keyboard::D, "RIGHT");
     registerAction(sf::Keyboard::S, "DOWN");
+
+    registerAction(sf::Keyboard::Up, "UP");
+    registerAction(sf::Keyboard::Left, "LEFT");
+    registerAction(sf::Keyboard::Right, "RIGHT");
+    registerAction(sf::Keyboard::Down, "DOWN");
+
+    //reset player position
+    registerAction(sf::Keyboard::R, "RESET");
 
     //menu
     registerAction(sf::Keyboard::P, "PAUSE");
@@ -52,7 +61,8 @@ void Scene_Play::loadLevel(std::string& filename)
 
 
     //test example.
-
+    m_drawCollision = true;
+    m_drawGrid = true;
 
 
     auto tile = m_entityManager.addEntity("Tile");
@@ -61,6 +71,12 @@ void Scene_Play::loadLevel(std::string& filename)
     tile->addComponent<CTransform>(gridToMidPixel(Vec2(0, 11), tile));
     tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
 
+    auto tile2 = m_entityManager.addEntity("Tile");
+    tile2->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top_left"), true);
+    tile2->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+    tile2->addComponent<CTransform>(gridToMidPixel(Vec2(12, 2), tile2));
+    tile2->addComponent<CBoundingBox>(tile2->getComponent<CAnimation>().m_animation.getSize());
+
 
     for (int i = 1; i < 20; i++)
     {
@@ -68,6 +84,15 @@ void Scene_Play::loadLevel(std::string& filename)
         e->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top"), true);
         e->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
         e->addComponent<CTransform>(gridToMidPixel(Vec2(i, 11), e));
+        e->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize()); 
+    }
+
+    for (int i = 1; i < 20; i++)
+    {
+        auto e = m_entityManager.addEntity("Tile");
+        e->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top"), true);
+        e->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+        e->addComponent<CTransform>(gridToMidPixel(Vec2(i, 3), e));
         e->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
     }
 
@@ -100,6 +125,7 @@ void Scene_Play::update()
 {
     m_entityManager.update();
     sMovement();
+    sCollision();
     sRender();
 
 }
@@ -115,7 +141,10 @@ void Scene_Play::sMovement()
 
     if (m_player->getComponent<CInput>().left) { m_player->getComponent<CTransform>().velocity.x = -5;}
     if (m_player->getComponent<CInput>().right) { m_player->getComponent<CTransform>().velocity.x = 5;}
-
+    
+    //test, replace with jump/gravity when implemented
+    if (m_player->getComponent<CInput>().up) { m_player->getComponent<CTransform>().velocity.y = -5; }
+    if (m_player->getComponent<CInput>().down) { m_player->getComponent<CTransform>().velocity.y = 5; }
     
 
 
@@ -152,11 +181,46 @@ void Scene_Play::sCollision()
 
     for (auto& e : m_entityManager.getEntities())
     {
+        if (e->tag() == "Tile")
+        { 
 
 
+            //if (overlap.x > 0 && overlap.y > 0)
+            if (Physics::AABB(m_player, e))
+            {
+                Vec2 overlap = Physics::GetOverlap(m_player, e);
+                if (overlap.x < 0 && overlap.y < 0)
+                {
+                    std::cout << "error maybe?";
+                    return;
+                }
 
 
+                bool isVertical = overlap.y < overlap.x;
 
+                Vec2 correctedPosition = { 0, 0 };
+
+                if (isVertical)
+                {
+                    correctedPosition.y = (m_player->getComponent<CTransform>().pos.y < e->getComponent<CTransform>().pos.y) ? overlap.y : -overlap.y;
+                }
+                else
+                {
+                    correctedPosition.x = (m_player->getComponent<CTransform>().pos.x < e->getComponent<CTransform>().pos.x) ? overlap.x : -overlap.x;
+                }
+ 
+                m_player->getComponent<CTransform>().pos -= correctedPosition;
+
+                e->getComponent<CBoundingBox>().debugColor = sf::Color::Green;
+            }
+            else
+            {
+                if (e->hasComponent<CBoundingBox>())
+                {
+                    e->getComponent<CBoundingBox>().debugColor = sf::Color::White;
+                }
+            }
+        }
 
     }
 
@@ -189,6 +253,7 @@ void Scene_Play::sDoAction(const Action& action)
 
         else if (name == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (name == "TOGGLE_COLLISION") { m_drawCollision = !m_drawCollision; }
+        else if (name == "RESET") { m_player->getComponent<CTransform>().pos = gridToMidPixel(Vec2(3, 3), m_player); }
     }
     else if (action.getType() == "END")
     {
@@ -237,6 +302,15 @@ void Scene_Play::sRender()
                 }
             }
         }
+
+
+        auto& transform = m_player->getComponent<CTransform>();
+        auto& animation = m_player->getComponent<CAnimation>().m_animation;
+
+        //animation.
+        animation.getSprite().setPosition(transform.pos.x, transform.pos.y);
+        m_game->window().draw(animation.getSprite());
+
     }
 
 
@@ -282,6 +356,15 @@ void Scene_Play::sRender()
                 CBoundingBox& boundingBox = e->getComponent<CBoundingBox>();
                 CTransform& transform = e->getComponent<CTransform>();
                 sf::RectangleShape rectShape;
+                sf::CircleShape circleShape;
+
+                circleShape.setRadius(10.0f);
+
+                circleShape.setPosition({transform.pos.x, transform.pos.y});
+
+                circleShape.setFillColor(sf::Color::Yellow);
+
+
 
                 //set shape to size of bound
                 rectShape.setSize({boundingBox.size.x, boundingBox.size.y});
@@ -289,11 +372,12 @@ void Scene_Play::sRender()
                 rectShape.setPosition({ transform.pos.x, transform.pos.y});
 
                 //set color
-                rectShape.setOutlineColor(sf::Color::Red);
+                rectShape.setOutlineColor(boundingBox.debugColor);
                 rectShape.setOutlineThickness(2.0f);
                 rectShape.setFillColor(sf::Color::Transparent);
                 //draw shape
                 m_game->window().draw(rectShape);
+                m_game->window().draw(circleShape);
 
             }
         }
