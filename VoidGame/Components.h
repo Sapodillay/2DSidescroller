@@ -29,6 +29,7 @@ class CTransform : public Component
 {
 public:
 	Vec2 pos = { 0.0, 0.0 };
+	Vec2 prev_pos = { 0.0, 0.0 };
 	Vec2 velocity = { 0.0, 0.0 };
 	float angle = 0;
 	CTransform() {}
@@ -110,4 +111,23 @@ public:
 	bool shoot = false;
 
 	CInput() {}
+};
+
+class CPlayerState : public Component
+{
+public:
+	bool isJumping = false;
+	float jumpTimer = 0.0f;
+	std::string state = "down";
+
+	CPlayerState() {}
+};
+
+class CGravity : public Component
+{
+public:
+	float gravity = 0;
+
+	CGravity() {}
+	CGravity(float grav) : gravity(grav) {}
 };
