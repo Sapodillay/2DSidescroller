@@ -115,6 +115,11 @@ void Scene_Play::spawnPlayer()
     //align to grid
     m_player->getComponent<CTransform>().pos = gridToMidPixel(Vec2(3, 3), m_player);
 
+
+    //Add playerstate
+    m_player->addComponent<CPlayerState>();
+    m_player->addComponent<CGravity>(5.0f);
+
 }
 
 void Scene_Play::spawnBullet(std::shared_ptr<Entity> entity)
@@ -139,12 +144,10 @@ void Scene_Play::sMovement()
     m_player->getComponent<CTransform>().velocity = { 0.0, 0.0 };
 
 
+    //horizontal movement
     if (m_player->getComponent<CInput>().left) { m_player->getComponent<CTransform>().velocity.x = -5;}
     if (m_player->getComponent<CInput>().right) { m_player->getComponent<CTransform>().velocity.x = 5;}
-    
-    //test, replace with jump/gravity when implemented
-    if (m_player->getComponent<CInput>().up) { m_player->getComponent<CTransform>().velocity.y = -5; }
-    if (m_player->getComponent<CInput>().down) { m_player->getComponent<CTransform>().velocity.y = 5; }
+  
     
 
 
@@ -153,12 +156,29 @@ void Scene_Play::sMovement()
 
     for (auto& e : m_entityManager.getEntities())
     {
-
         if (e->hasComponent<CTransform>())
         {
             CTransform& transform = e->getComponent<CTransform>();
+            if (e->hasComponent<CGravity>())
+            {
+                //add grounded check here to make more efficent
+                //apply gravity.
+                transform.velocity.y += e->getComponent<CGravity>().gravity;
+            }
+
+            //set previous pos,
+            transform.prev_pos = transform.pos;
+
+            //apply velocity to all CTransform entites
             transform.pos += transform.velocity;
+
+            if (e->hasComponent<CShape>())
+            {
+                e->getComponent<CShape>().circle.setPosition(transform.pos.x, transform.pos.y);
+            }
         }
+
+
 
 
     }
@@ -191,12 +211,14 @@ void Scene_Play::sCollision()
                 Vec2 overlap = Physics::GetOverlap(m_player, e);
                 if (overlap.x < 0 && overlap.y < 0)
                 {
-                    std::cout << "error maybe?";
+                    std::cout << "Collision error";
                     return;
                 }
 
 
-                bool isVertical = overlap.y < overlap.x;
+                bool isVertical = overlap.y <= overlap.x;
+
+
 
                 Vec2 correctedPosition = { 0, 0 };
 
@@ -206,6 +228,7 @@ void Scene_Play::sCollision()
                 }
                 else
                 {
+                    std::cout << "overlap.y: " << overlap.y << " overlap.x: " << overlap.x;
                     correctedPosition.x = (m_player->getComponent<CTransform>().pos.x < e->getComponent<CTransform>().pos.x) ? overlap.x : -overlap.x;
                 }
  
@@ -280,6 +303,20 @@ void Scene_Play::sAnimation()
 
 void Scene_Play::sPlayerState()
 {
+
+    auto& transform = m_player->getComponent<CTransform>();
+    auto& state = m_player->getComponent<CPlayerState>();
+
+    if (!state.isJumping)
+    {
+        if (transform.pos == transform.prev_pos)
+            state.state = "Standing";
+        if (transform.pos.x != transform.prev_pos.x && transform.pos.y == transform.prev_pos.y)
+            state.state = "Running";
+
+    }
+
+
 }
 
 void Scene_Play::sRender()
