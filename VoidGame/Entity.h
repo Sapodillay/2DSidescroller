@@ -15,6 +15,8 @@ typedef std::tuple<
 	CScore,
 	CLifespan,
 	CAnimation,
+	CGravity,
+	CPlayerState,
 	CBoundingBox> 
 	ComponentTuple;
 
@@ -33,7 +35,7 @@ class Entity
 	Entity(const std::string& tag, const size_t id) :
 	m_tag(tag),
 	m_id(id),
-	m_components(CTransform(), CShape(), CCollision(),  CInput(), CScore(), CLifespan(), CAnimation(), CBoundingBox()) 
+	m_components(CTransform(), CShape(), CCollision(),  CInput(), CScore(), CLifespan(), CAnimation(), CGravity(), CPlayerState(), CBoundingBox()) 
 	{};
 
 public:
