@@ -118,7 +118,7 @@ class CPlayerState : public Component
 public:
 	bool isJumping = false;
 	float jumpTimer = 0.0f;
-	std::string state = "down";
+	std::string state = "Down";
 
 	CPlayerState() {}
 };
