@@ -118,7 +118,7 @@ void Scene_Play::spawnPlayer()
 
     //Add playerstate
     m_player->addComponent<CPlayerState>();
-    m_player->addComponent<CGravity>(5.0f);
+    m_player->addComponent<CGravity>(1.0f);
 
 }
 
@@ -132,7 +132,7 @@ void Scene_Play::update()
     sMovement();
     sCollision();
     sRender();
-
+    sPlayerState();
 }
 
 void Scene_Play::sScore()
@@ -141,12 +141,35 @@ void Scene_Play::sScore()
 
 void Scene_Play::sMovement()
 {
-    m_player->getComponent<CTransform>().velocity = { 0.0, 0.0 };
+
+    CPlayerState& playerState = m_player->getComponent<CPlayerState>();
+    CTransform& playerTransform = m_player->getComponent<CTransform>();
+    //if player is in air, keep y velocity.
+    if (playerState.state == "Up" || playerState.state == "Down")
+    {
+        playerTransform.velocity = { 0.0, playerTransform.velocity.y };
+    }
+    else
+    {
+        playerTransform.velocity = { 0.0, 0.0 };
+    }
+
+
+
+
+    if (m_player->getComponent<CInput>().up && playerState.jumpTimer < 5.0f && playerState.state != "Down")
+    {
+        //Handle jump logic
+        playerTransform.velocity.y = -10;
+        playerState.jumpTimer += 0.2f;
+    }
+
+
 
 
     //horizontal movement
-    if (m_player->getComponent<CInput>().left) { m_player->getComponent<CTransform>().velocity.x = -5;}
-    if (m_player->getComponent<CInput>().right) { m_player->getComponent<CTransform>().velocity.x = 5;}
+    if (m_player->getComponent<CInput>().left) { playerTransform.velocity.x = -5;}
+    if (m_player->getComponent<CInput>().right) { playerTransform.velocity.x = 5;}
   
     
 
@@ -228,13 +251,40 @@ void Scene_Play::sCollision()
                 }
                 else
                 {
-                    std::cout << "overlap.y: " << overlap.y << " overlap.x: " << overlap.x;
                     correctedPosition.x = (m_player->getComponent<CTransform>().pos.x < e->getComponent<CTransform>().pos.x) ? overlap.x : -overlap.x;
                 }
  
                 m_player->getComponent<CTransform>().pos -= correctedPosition;
 
                 e->getComponent<CBoundingBox>().debugColor = sf::Color::Green;
+
+                //Update playerstate
+                if (isVertical)
+                {
+
+                    //check that the player is colliding with the top of the block
+
+                    bool isOnTop = (correctedPosition.y > 0) && (m_player->getComponent<CTransform>().pos.y < e->getComponent<CTransform>().pos.y);
+
+                    if (isOnTop)
+                    {
+                        //if player is grounded, reset isJumping and jump timer to allow them to jump again.
+                        m_player->getComponent<CPlayerState>().isJumping = false;
+                        m_player->getComponent<CPlayerState>().jumpTimer = 0.0f;
+                    }
+                    else
+                    {
+                        m_player->getComponent<CPlayerState>().isJumping = true;
+                        m_player->getComponent<CPlayerState>().state = "Down";
+                        //m_player->getComponent<CTransform>().velocity.y = 0.0f;
+                    }
+
+
+                }
+
+
+
+
             }
             else
             {
@@ -267,7 +317,7 @@ void Scene_Play::sDoAction(const Action& action)
     {
         std::string name = action.getName();
 
-        if (name == "UP") { input.up = true; }
+        if (name == "UP") { input.up = true; m_player->getComponent<CPlayerState>().isJumping = true; }
         else if (name == "LEFT") { input.left = true; }
         else if (name == "RIGHT") { input.right = true; }
         else if (name == "DOWN") { input.down = true; }
@@ -311,12 +361,17 @@ void Scene_Play::sPlayerState()
     {
         if (transform.pos == transform.prev_pos)
             state.state = "Standing";
-        if (transform.pos.x != transform.prev_pos.x && transform.pos.y == transform.prev_pos.y)
+        else if (transform.pos.x != transform.prev_pos.x && transform.pos.y == transform.prev_pos.y)
             state.state = "Running";
 
     }
-
-
+    else
+    {
+        if (transform.pos.y < transform.prev_pos.y)
+            state.state = "Up";
+        else
+            state.state = "Down";
+    }
 }
 
 void Scene_Play::sRender()
