@@ -2,6 +2,7 @@
 #include "Scene_Play.h"
 
 #include <iostream>
+#include "Scene_LevelEditor.h"
 
 
 GameEngine::GameEngine(const std::string& filename)
@@ -18,7 +19,8 @@ void GameEngine::init(const std::string& path)
 	m_window.create(sf::VideoMode(1280, 768), "Void Game");
 	m_window.setFramerateLimit(60);
 
-	changeScene("GAME", std::make_shared<Scene_Play>(this, path));
+	//changeScene("GAME", std::make_shared<Scene_Play>(this, path));
+	changeScene("EDITOR", std::make_shared<Scene_LevelEditor>(this, path));
 
 }
 
