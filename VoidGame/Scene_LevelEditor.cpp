@@ -3,6 +3,9 @@
 #include <SFML/Graphics.hpp>
 #include "Physics.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
+
 
 Scene_LevelEditor::Scene_LevelEditor(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath)
@@ -32,12 +35,21 @@ void Scene_LevelEditor::init(std::string& levelPath)
     m_text.setFont(m_font);
     m_text.setCharacterSize(12);
     m_text.setFillColor(sf::Color::White);
- 
-    loadLevel(levelPath);
 }
 
 void Scene_LevelEditor::loadLevel(std::string& filename)
 {
+
+    //Delete existing tiles
+    for (auto& e : m_entityManager.getEntities())
+    {
+        if (e->tag() == "Tile")
+        {
+            m_entityManager.deleteEntity(e);
+        }
+    }
+
+
 
     //load from file.
 
@@ -47,39 +59,33 @@ void Scene_LevelEditor::loadLevel(std::string& filename)
     m_drawGrid = true;
 
 
-    auto tile = m_entityManager.addEntity("Tile");
-    tile->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top_left"), true);
-    tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-    tile->addComponent<CTransform>(gridToMidPixel(Vec2(0, 11), tile));
-    tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
-
-    auto tile2 = m_entityManager.addEntity("Tile");
-    tile2->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top_left"), true);
-    tile2->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-    tile2->addComponent<CTransform>(gridToMidPixel(Vec2(12, 2), tile2));
-    tile2->addComponent<CBoundingBox>(tile2->getComponent<CAnimation>().m_animation.getSize());
-
-
-    for (int i = 1; i < 20; i++)
+    std::ifstream configFile("levels/" + filename + ".txt");
+    std::string line;
+    while (std::getline(configFile, line))
     {
-        auto e = m_entityManager.addEntity("Tile");
-        e->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top"), true);
-        e->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-        e->addComponent<CTransform>(gridToMidPixel(Vec2(i, 11), e));
-        e->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
+        std::istringstream iss(line);
+
+        std::string animationName;
+        int x;
+        int y;
+        std::string isBoundingBox;
+
+        iss >> animationName >> x >> y >> isBoundingBox;
+
+
+        Vec2 GridPos(x, y);
+
+        Animation animation = m_game->getAssets().getAnimation(animationName);
+        auto tile = m_entityManager.addEntity("Tile");
+        tile->addComponent<CAnimation>(animation, true);
+        tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+        tile->addComponent<CTransform>(gridToMidPixel(GridPos, tile));
+
+        if (isBoundingBox == "true")
+        {
+            tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
+        }
     }
-
-    for (int i = 1; i < 20; i++)
-    {
-        auto e = m_entityManager.addEntity("Tile");
-        e->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top"), true);
-        e->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-        e->addComponent<CTransform>(gridToMidPixel(Vec2(i, 3), e));
-        e->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
-    }
-
-
-
 }
 
 
@@ -113,16 +119,6 @@ void Scene_LevelEditor::sDoAction(const Action& action)
         std::string name = action.getName();
         if (name == "LEFT_CLICK")
         {
-            if (m_currentTool == "SAVE")
-            {
-
-                std::cout << "Enter file name to save file to ";
-                std::string fileName;
-                std::cin >> fileName;
-                std::cout << std::endl;
-
-                saveLevel(fileName);
-            }
             if (m_currentTool == "PLACE")
             {
                 Vec2 GridPos = pixelToGrid(GetMousePosition());
@@ -293,10 +289,21 @@ void Scene_LevelEditor::saveLevel(std::string fileName)
 
     //Save all tiles.
 
+    std::ofstream outfile("levels/" + fileName + ".txt");
+
+
     for (auto& e : m_entityManager.getEntities())
     {
         if (e->hasComponent<CBoundingBox>())
         {
+
+            Vec2 GridPos = pixelToGrid(e->getComponent<CTransform>().pos);
+
+            std::string entityData;
+            entityData.append(e->getComponent<CAnimation>().m_animation.getName() + " ");
+            entityData.append(std::to_string(int(GridPos.x)) + " " + std::to_string(int(GridPos.y)) + " ");
+            entityData.append("true ");
+            outfile << entityData << std::endl;
         }
     }
 
@@ -304,8 +311,8 @@ void Scene_LevelEditor::saveLevel(std::string fileName)
 
 
 
-
-
+    //close file stream
+    outfile.close();
 }
 
 void Scene_LevelEditor::handleConsole()
@@ -325,7 +332,7 @@ void Scene_LevelEditor::handleConsole()
     //TODO : COMMAND CLASS AND COMMAND REGISTERING
 
     std::cout << "List of commands - " << std::endl;
-    std::cout << "PLACE, ERASE" << std::endl;
+    std::cout << "PLACE, ERASE, SAVE, LOAD" << std::endl;
 
 
     std::cout << "Enter command: ";
@@ -335,7 +342,25 @@ void Scene_LevelEditor::handleConsole()
     std::cin >> commandName;
     std::cout << std::endl;
 
-    if (commandName == "PLACE")
+    if (commandName == "SAVE")
+    {
+        std::cout << "Enter file name to save file to: ";
+        std::string fileName;
+        std::cin >> fileName;
+        std::cout << std::endl;
+
+        saveLevel(fileName);
+    }
+    else if (commandName == "LOAD")
+    {
+        std::cout << "Enter file name to load: ";
+        std::string fileName;
+        std::cin >> fileName;
+        std::cout << std::endl;
+
+        loadLevel(fileName);
+    }
+    else if (commandName == "PLACE")
     {
         m_currentTool = "PLACE";
 
