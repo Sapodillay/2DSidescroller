@@ -77,3 +77,13 @@ Animation Assets::getAnimation(const std::string& name)
 {
 	return m_animations[name];
 }
+
+std::vector<Animation> Assets::getAnimations()
+{
+	std::vector<Animation> animations;
+	for (const auto& anim : m_animations)
+	{
+		animations.push_back(anim.second);
+	}
+	return animations;
+}
