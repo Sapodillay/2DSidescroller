@@ -20,6 +20,7 @@ protected:
 	bool m_paused = false;
 	bool m_hasEnded = false;
 	size_t m_currentFrame = 0;
+	Vec2 m_mousePosition;
 
 	virtual void onEnd() = 0;
 	void setPaused(bool paused);
@@ -32,6 +33,10 @@ public:
 	virtual void sDoAction(const Action& action);
 	void simulate(const size_t frames);
 	void registerAction(sf::Keyboard::Key inputKey, const std::string& actionName);
+	void registerMouseAction(sf::Mouse::Button inputButton, const std::string& actionName);
+
+	void SetMousePosition(Vec2 position);
+	Vec2 GetMousePosition();
 
 	//size_t width() const;
 	//size_t height() const;

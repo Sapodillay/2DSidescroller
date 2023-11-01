@@ -22,6 +22,20 @@ void Scene::registerAction(sf::Keyboard::Key inputKey, const std::string& action
 	m_actionMap[static_cast<int>(inputKey)] = actionName;
 }
 
+void Scene::registerMouseAction(sf::Mouse::Button inputButton, const std::string& actionName)
+{
+	m_actionMap[static_cast<int>(inputButton)] = actionName;
+}
+
+void Scene::SetMousePosition(Vec2 position)
+{
+	m_mousePosition = position;
+}
+
+Vec2 Scene::GetMousePosition()
+{
+	return m_mousePosition;
+}
 
 size_t Scene::currentFrame() const
 {

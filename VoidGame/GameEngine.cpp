@@ -104,8 +104,24 @@ void GameEngine::sUserInput()
 			const std::string actionType = (event.type == sf::Event::KeyPressed) ? "START" : "END";
 			currentScene()->sDoAction(Action(actionMap.at(event.key.code), actionType));
 		}
+		if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseButtonReleased)
+		{
 
+			ActionMap actionMap = currentScene()->getActionMap();
 
+			if (actionMap.find(event.key.code) == actionMap.end()) { continue; }
+
+			const std::string actionType = (event.type == sf::Event::MouseButtonPressed) ? "MOUSE_START" : "MOUSE_END";
+			currentScene()->sDoAction(Action(actionMap.at(event.key.code), actionType));
+		}
+		if (event.type == sf::Event::MouseMoved)
+		{
+			Vec2 mousePosition;
+			mousePosition.x = event.mouseMove.x;
+			mousePosition.y = event.mouseMove.y;
+
+			currentScene()->SetMousePosition(mousePosition);
+		}
 
 	}
 }
