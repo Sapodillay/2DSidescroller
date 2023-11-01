@@ -20,6 +20,9 @@ protected:
 	bool m_drawGrid = false;
 	bool m_drawUI = true;
 
+	std::string m_currentTool;
+	Animation m_selectedAnimation;
+
 private:
 	void init(std::string& levelPath);
 	void loadLevel(std::string& filename);
@@ -28,8 +31,16 @@ private:
 	void sAnimation();
 	void sRender();
 	void onEnd();
+
+	//Scene functions
+	void handleConsole();
+	void Place(Vec2 GridPos, Animation animation);
+
+
+
 	Vec2 gridToPixel(Vec2 gridPos);
 	Vec2 gridToMidPixel(Vec2 gridPos, std::shared_ptr<Entity> entity);
+	Vec2 pixelToGrid(Vec2 pixelPos);
 	void drawLine(const Vec2& p1, const Vec2& p2);
 
 };
