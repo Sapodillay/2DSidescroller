@@ -113,11 +113,48 @@ void Scene_LevelEditor::sDoAction(const Action& action)
         std::string name = action.getName();
         if (name == "LEFT_CLICK")
         {
+            if (m_currentTool == "SAVE")
+            {
+
+                std::cout << "Enter file name to save file to ";
+                std::string fileName;
+                std::cin >> fileName;
+                std::cout << std::endl;
+
+                saveLevel(fileName);
+            }
             if (m_currentTool == "PLACE")
             {
                 Vec2 GridPos = pixelToGrid(GetMousePosition());
                 //Place(GridPos, m_game->getAssets().getAnimation("grass_top_left"));
                 Place(GridPos, m_selectedAnimation);
+            }
+            if (m_currentTool == "ERASE")
+            {
+                Vec2 GridPos = pixelToGrid(GetMousePosition());
+
+                //Find the block in the current selection.
+
+                for (auto& e : m_entityManager.getEntities())
+                {
+                    if (e->hasComponent<CAnimation>())
+                    {
+                        if (e->hasComponent<CTransform>())
+                        {
+                            auto& transform = e->getComponent<CTransform>();
+                            auto& animation = e->getComponent<CAnimation>().m_animation;
+
+                            if (pixelToGrid(transform.pos) == GridPos)
+                            {
+                                std::cout << "Destroying entity " << e->tag() << std::endl;
+                                e->destroy();
+                                m_entityManager.deleteEntity(e);
+                            }
+                        }
+                    }
+                }
+
+
             }
             else
             {
@@ -251,6 +288,26 @@ void Scene_LevelEditor::onEnd()
 {
 }
 
+void Scene_LevelEditor::saveLevel(std::string fileName)
+{
+
+    //Save all tiles.
+
+    for (auto& e : m_entityManager.getEntities())
+    {
+        if (e->hasComponent<CBoundingBox>())
+        {
+        }
+    }
+
+
+
+
+
+
+
+}
+
 void Scene_LevelEditor::handleConsole()
 {
 
@@ -268,7 +325,7 @@ void Scene_LevelEditor::handleConsole()
     //TODO : COMMAND CLASS AND COMMAND REGISTERING
 
     std::cout << "List of commands - " << std::endl;
-    std::cout << "PLACE" << std::endl;
+    std::cout << "PLACE, ERASE" << std::endl;
 
 
     std::cout << "Enter command: ";
@@ -298,6 +355,10 @@ void Scene_LevelEditor::handleConsole()
         std::cin >> animationString;
 
         m_selectedAnimation = m_game->getAssets().getAnimation(animationString);
+    }
+    else if (commandName == "ERASE")
+    {
+        m_currentTool = "ERASE";
     }
     else
     {
