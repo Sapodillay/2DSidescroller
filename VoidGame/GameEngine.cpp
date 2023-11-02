@@ -2,7 +2,10 @@
 #include "Scene_Play.h"
 
 #include <iostream>
+#include "Scene_LevelEditor.h"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui-SFML.h"
 
 GameEngine::GameEngine(const std::string& filename)
 {
@@ -16,9 +19,11 @@ void GameEngine::init(const std::string& path)
 	m_assets.loadFromFile("config/AssetFiles.txt");
 
 	m_window.create(sf::VideoMode(1280, 768), "Void Game");
+	ImGui::SFML::Init(m_window);
 	m_window.setFramerateLimit(60);
 
-	changeScene("GAME", std::make_shared<Scene_Play>(this, path));
+	//changeScene("GAME", std::make_shared<Scene_Play>(this, path));
+	changeScene("EDITOR", std::make_shared<Scene_LevelEditor>(this, path));
 
 }
 
@@ -88,6 +93,7 @@ void GameEngine::sUserInput()
 	sf::Event event;
 	while (m_window.pollEvent(event))
 	{
+		ImGui::SFML::ProcessEvent(event);
 		if (event.type == sf::Event::Closed)
 		{
 			quit();
@@ -95,15 +101,34 @@ void GameEngine::sUserInput()
 
 		if (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased)
 		{
+			if (!ImGui::GetIO().WantCaptureKeyboard)
+			{
+				ActionMap actionMap = currentScene()->getActionMap();
 
-			ActionMap actionMap = currentScene()->getActionMap();
-
-			if (actionMap.find(event.key.code) == actionMap.end()) { continue; }
-			const std::string actionType = (event.type == sf::Event::KeyPressed) ? "START" : "END";
-			currentScene()->sDoAction(Action(actionMap.at(event.key.code), actionType));
+				if (actionMap.find(event.key.code) == actionMap.end()) { continue; }
+				const std::string actionType = (event.type == sf::Event::KeyPressed) ? "START" : "END";
+				currentScene()->sDoAction(Action(actionMap.at(event.key.code), actionType));
+			}
 		}
+		if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseButtonReleased)
+		{
 
+			if (!ImGui::GetIO().WantCaptureMouse)
+			{
+				ActionMap actionMap = currentScene()->getActionMap();
+				if (actionMap.find(event.key.code) == actionMap.end()) { continue; }
+				const std::string actionType = (event.type == sf::Event::MouseButtonPressed) ? "MOUSE_START" : "MOUSE_END";
+				currentScene()->sDoAction(Action(actionMap.at(event.key.code), actionType));
+			}
+		}
+		if (event.type == sf::Event::MouseMoved)
+		{
+			Vec2 mousePosition;
+			mousePosition.x = event.mouseMove.x;
+			mousePosition.y = event.mouseMove.y;
 
+			currentScene()->SetMousePosition(mousePosition);
+		}
 
 	}
 }
@@ -112,4 +137,5 @@ void GameEngine::sUserInput()
 void GameEngine::quit()
 {
 	m_running = false;
+	ImGui::SFML::Shutdown();
 }

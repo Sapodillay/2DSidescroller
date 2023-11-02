@@ -20,6 +20,9 @@ public:
 	Animation getAnimation(const std::string& name);
 	sf::Font getFont(const std::string& name);
 
+	std::vector<Animation> getAnimations();
+
+
 private:
 	std::map<std::string, sf::Texture> m_textures;
 	std::map<std::string, sf::Font> m_fonts;

@@ -14,33 +14,32 @@ void EntityManager::update()
 	}
 	m_entitiesToAdd.clear();
 
-	removeDeadEntities(m_entities);
 
-	//C++17
-	//for (auto& [tag, entityVec] : m_entityMap)
-	//{
-	//	removeDeadEntities(entityVec);
-	//}
-
-
-
-}
-
-void EntityManager::removeDeadEntities(EntityVec& vec)
-{
-
-	for (auto e : vec)
+	for (auto& e : m_entitesToRemove)
 	{
-		if (!e->isActive())
-		{
-			//todo
+		auto i = std::find(m_entities.begin(), m_entities.end(), e);
+		if (i != m_entities.end()) {
+			m_entities.erase(i);
+		}
 
+		auto mapIter = m_entityMap.find(e->tag());
+		if (mapIter != m_entityMap.end()) {
+			auto& entityList = mapIter->second;
+			auto listerIter = std::find(entityList.begin(), entityList.end(), e);
+			if (listerIter != entityList.end()) {
+				entityList.erase(listerIter);
+			}
 		}
 	}
-
-
-
+	m_entitesToRemove.clear();
 }
+
+void EntityManager::deleteEntity(std::shared_ptr<Entity> e)
+{
+	m_entitesToRemove.push_back(e);
+}
+
+
 
 std::shared_ptr<Entity> EntityManager::addEntity(const std::string& tag)
 {
