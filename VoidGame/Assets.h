@@ -12,6 +12,7 @@ public:
 	void loadFromFile(const std::string& path);
 
 	void addTexture(const std::string& name, const std::string path);
+	void addAnimationFromAtlas(const std::string& name, const std::string path, Vec2 atlasPostion, Vec2 size);
 	void addAnimation(const std::string& name, const std::string path);
 	void addAnimation(const std::string& name, const std::string path, size_t frameCount, size_t speed);
 	void addFont(const std::string& name, const std::string& path);

@@ -28,6 +28,34 @@ void Assets::loadFromFile(const std::string& path)
 			std::cout << "Adding animation: " + name << " " << path << " " << frameCount << " " << speed << std::endl;
 			addAnimation(name, path, frameCount, speed);
 		}
+		else if (token == "AnimationAtlas")
+		{
+			std::string name;
+			std::string path;
+			int sizeX;
+			int sizeY;
+			int posX;
+			int posY;
+
+			Vec2 size;
+			Vec2 pos;
+
+
+
+			iss >> name >> path >> sizeX >> sizeY >> posX >> posY;
+
+			size.x = sizeX;
+			size.y = sizeY;
+			pos.x = posX;
+			pos.y = posY;
+
+			std::cout << "Adding animation atlas: " + name << " " << path << " " << std::endl;
+			addAnimationFromAtlas(name, path, pos, size);
+
+
+
+		}
+
 
 
 	}
@@ -44,6 +72,25 @@ void Assets::addTexture(const std::string& name, const std::string path)
 	if (!tex.loadFromFile(path))
 		std::cout << "Failed to load texture: " << name << std::endl;
 	m_textures[name] = tex;
+}
+
+void Assets::addAnimationFromAtlas(const std::string& name, const std::string path, Vec2 atlasPostion, Vec2 size)
+{
+	sf::Texture tex;
+
+	if (!tex.loadFromFile(path, sf::IntRect(atlasPostion.x, atlasPostion.y, size.x, size.y)))
+	{
+		std::cout << "Error loading texture :" << "name in atlas: " << path << std::endl;
+	}
+
+	auto result = m_textures.insert(std::make_pair(name, tex));
+
+	if (result.second)
+	{
+		const sf::Texture& textureRef = result.first->second;
+		Animation anim(name, textureRef, 1, 0);
+		m_animations.insert(std::make_pair(name, anim));
+	}
 }
 
 void Assets::addAnimation(const std::string& name, const std::string path)
