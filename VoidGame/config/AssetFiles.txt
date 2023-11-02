@@ -3,9 +3,15 @@ Animation grass_top tmp/grass_top.png 1 0
 Animation grass_top_left tmp/grass_top_left.png 1 0
 
 
-AnimationAtlas wood_top_left tmp/oak_woods_tileset.png 16 16 0 0
-AnimationAtlas wood_top_1 tmp/oak_woods_tileset.png 16 16 16 0
-AnimationAtlas wood_top_2 tmp/oak_woods_tileset.png 16 16 32 0
-AnimationAtlas wood_top_3 tmp/oak_woods_tileset.png 16 16 48 0
-AnimationAtlas wood_top_4 tmp/oak_woods_tileset.png 16 16 64 0
-AnimationAtlas wood_top_right tmp/oak_woods_tileset.png 16 16 80 0
+AnimationAtlas ground_top_left tmp/oak_woods_tileset.png 16 16 0 0
+AnimationAtlas ground_top tmp/oak_woods_tileset.png 16 16 16 0
+AnimationAtlas ground_top_right tmp/oak_woods_tileset.png 16 16 80 0
+
+AnimationAtlas ground_left tmp/oak_woods_tileset.png 16 16 0 16
+AnimationAtlas ground_right tmp/oak_woods_tileset.png 16 16 80 16
+
+AnimationAtlas ground_bottom_left tmp/oak_woods_tileset.png 16 16 0 80
+AnimationAtlas ground_bottom_right tmp/oak_woods_tileset.png 16 16 80 80
+AnimationAtlas ground_bottom tmp/oak_woods_tileset.png 16 16 16 80
+
+AnimationAtlas ground_solid tmp/oak_woods_tileset.png 16 16 16 16
