@@ -14,6 +14,8 @@ protected:
 	sf::Font m_font;
 	sf::Text m_text;
 	Vec2 m_gridSize = { 32.0f, 32.0f };
+	Vec2 m_moveCache;
+	Vec2 m_centerPosition;
 	std::string m_levelPath;
 	bool m_drawTextures = true;
 	bool m_drawCollision = false;
@@ -42,6 +44,7 @@ private:
 	Vec2 gridToPixel(Vec2 gridPos);
 	Vec2 gridToMidPixel(Vec2 gridPos, std::shared_ptr<Entity> entity);
 	Vec2 pixelToGrid(Vec2 pixelPos);
+	Vec2 localPixelToGrid(Vec2 pixelPos);
 	void drawLine(const Vec2& p1, const Vec2& p2);
 
 };

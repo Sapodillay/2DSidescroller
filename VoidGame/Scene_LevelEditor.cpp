@@ -27,6 +27,9 @@ void Scene_LevelEditor::init(std::string& levelPath)
     registerAction(sf::Keyboard::C, "TOGGLE_COLLISION");
     registerAction(sf::Keyboard::G, "TOGGLE_GRID");
 
+    registerAction(sf::Keyboard::Left, "MOVE_LEFT");
+    registerAction(sf::Keyboard::Right, "MOVE_RIGHT");
+
 
     m_gridSize.x = m_game->window().getSize().x / 20.0f;
     m_gridSize.y = m_game->window().getSize().y / 12.0f;
@@ -121,6 +124,17 @@ void Scene_LevelEditor::sDoAction(const Action& action)
         {
             //enable palette
         }
+        else if (name == "MOVE_LEFT")
+        {
+            m_moveCache.x += 1;
+            m_centerPosition.x += 1;
+        }
+        else if (name == "MOVE_RIGHT")
+        {
+            m_moveCache.x -= 1;
+            m_centerPosition.x -= 1;
+        }
+
 
 
     }
@@ -135,8 +149,7 @@ void Scene_LevelEditor::sDoAction(const Action& action)
         {
             if (m_currentTool == "PLACE")
             {
-                Vec2 GridPos = pixelToGrid(GetMousePosition());
-                //Place(GridPos, m_game->getAssets().getAnimation("grass_top_left"));
+                Vec2 GridPos = localPixelToGrid(GetMousePosition());
                 Place(GridPos, m_selectedAnimation);
             }
             else if (m_currentTool == "ERASE")
@@ -194,6 +207,19 @@ void Scene_LevelEditor::sRender()
     ImGui::SFML::Update(m_game->window(), m_game->deltaClock.restart());
     m_game->window().clear();
 
+    Vec2 PixelCenter = gridToPixel(m_moveCache);
+
+    float windowCenterX = std::max(m_game->window().getSize().x / 2.0f, PixelCenter.x);
+    sf::View view = m_game->window().getView();
+    //view.setCenter(windowCenterX + 100, m_game->window().getSize().y - view.getCenter().y);
+    if (PixelCenter.x != 0)
+    {
+        view.move({ PixelCenter.x, 0 });
+        m_moveCache = { 0, 0 };
+    }
+
+    m_game->window().setView(view);
+
 
 
     //imgui draw
@@ -226,10 +252,20 @@ void Scene_LevelEditor::sRender()
 
         float windowWidth = m_game->window().getSize().x;
 
-        float leftX = 0.0f;
-        float rightX = windowWidth;
-        int xTile = 0;
-        int yTile = 0;
+        float centerX = gridToPixel(m_centerPosition).x;
+
+        if (centerX < m_game->window().getSize().x / 2.0f)
+        {
+            centerX = m_game->window().getSize().x / 2.0f;
+        }
+
+
+        sf::View view = m_game->window().getView();
+
+        float leftX = view.getCenter().x - windowWidth / 2;
+        float rightX = view.getCenter().x + windowWidth / 2;
+        int xTile = leftX / m_gridSize.x;
+        int yTile = rightX / m_gridSize.y;
 
         for (float x = leftX; x < rightX; x += m_gridSize.x)
         {
@@ -299,6 +335,15 @@ void Scene_LevelEditor::drawLine(const Vec2& p1, const Vec2& p2)
 {
     sf::Vertex line[] = { sf::Vertex(sf::Vector2f(p1.x, p1.y)), sf::Vertex(sf::Vector2f(p2.x, p2.y)) };
     m_game->window().draw(line, 2, sf::Lines);
+}
+
+Vec2 Scene_LevelEditor::localPixelToGrid(Vec2 pixelPos)
+{
+    sf::View view = m_game->window().getView();
+    Vec2 translatedPixel = pixelPos;
+    translatedPixel.x += view.getCenter().x - (view.getSize().x / 2);
+    translatedPixel.y += view.getCenter().y - (view.getSize().y / 2);
+    return Vec2(int(translatedPixel.x / m_gridSize.x), int(translatedPixel.y / m_gridSize.y));
 }
 
 void Scene_LevelEditor::onEnd()
@@ -440,7 +485,10 @@ void Scene_LevelEditor::Place(Vec2 GridPos, Animation animation)
 
 Vec2 Scene_LevelEditor::gridToPixel(Vec2 gridPos)
 {
-    return Vec2(gridPos.x * m_gridSize.x, gridPos.y * m_gridSize.y);
+    Vec2 PixelPos(gridPos.x * m_gridSize.x, gridPos.y * m_gridSize.y);
+
+
+    return Vec2(PixelPos.x, PixelPos.y);
 }
 
 Vec2 Scene_LevelEditor::gridToMidPixel(Vec2 gridPos, std::shared_ptr<Entity> entity)
@@ -456,6 +504,8 @@ Vec2 Scene_LevelEditor::gridToMidPixel(Vec2 gridPos, std::shared_ptr<Entity> ent
     Vec2 EntityPos = entity->getComponent<CAnimation>().m_animation.getSize();
     result.x += EntityPos.x / 2.0f;
     result.y -= EntityPos.y / 2.0f;
+
+
     return result;
 }
 
