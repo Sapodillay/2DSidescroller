@@ -20,7 +20,6 @@ void EntityManager::update()
 		auto i = std::find(m_entities.begin(), m_entities.end(), e);
 		if (i != m_entities.end()) {
 			m_entities.erase(i);
-			std::cout << "Deleted" << std::endl;
 		}
 
 		auto mapIter = m_entityMap.find(e->tag());
