@@ -24,6 +24,7 @@ protected:
 
 	std::string m_currentTool;
 	Animation m_selectedAnimation;
+	bool m_solidPlace = true;
 
 private:
 	void init(std::string& levelPath);

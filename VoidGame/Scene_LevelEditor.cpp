@@ -70,7 +70,7 @@ void Scene_LevelEditor::loadLevel(std::string& filename)
 
 
     //test example.
-    m_drawCollision = true;
+    m_drawCollision = false;
     m_drawGrid = true;
 
 
@@ -154,7 +154,7 @@ void Scene_LevelEditor::sDoAction(const Action& action)
             }
             else if (m_currentTool == "ERASE")
             {
-                Vec2 GridPos = pixelToGrid(GetMousePosition());
+                Vec2 GridPos = localPixelToGrid(GetMousePosition());
 
                 //Find the block in the current selection.
 
@@ -252,14 +252,6 @@ void Scene_LevelEditor::sRender()
 
         float windowWidth = m_game->window().getSize().x;
 
-        float centerX = gridToPixel(m_centerPosition).x;
-
-        if (centerX < m_game->window().getSize().x / 2.0f)
-        {
-            centerX = m_game->window().getSize().x / 2.0f;
-        }
-
-
         sf::View view = m_game->window().getView();
 
         float leftX = view.getCenter().x - windowWidth / 2;
@@ -337,6 +329,7 @@ void Scene_LevelEditor::drawLine(const Vec2& p1, const Vec2& p2)
     m_game->window().draw(line, 2, sf::Lines);
 }
 
+//convert screen pixels to grid position
 Vec2 Scene_LevelEditor::localPixelToGrid(Vec2 pixelPos)
 {
     sf::View view = m_game->window().getView();
@@ -382,6 +375,10 @@ void Scene_LevelEditor::paletteRender()
         }
         ImGui::EndCombo();
     }
+
+    ImGui::SameLine();
+    ImGui::Checkbox("Solid", &m_solidPlace);
+
 
     ImGui::Text("Select Material: ");
 
@@ -462,6 +459,17 @@ void Scene_LevelEditor::saveLevel(std::string fileName)
             entityData.append("true ");
             outfile << entityData << std::endl;
         }
+        else
+        {
+
+            Vec2 GridPos = pixelToGrid(e->getComponent<CTransform>().pos);
+
+            std::string entityData;
+            entityData.append(e->getComponent<CAnimation>().m_animation.getName() + " ");
+            entityData.append(std::to_string(int(GridPos.x)) + " " + std::to_string(int(GridPos.y)) + " ");
+            entityData.append("false ");
+            outfile << entityData << std::endl;
+        }
     }
 
 
@@ -479,8 +487,10 @@ void Scene_LevelEditor::Place(Vec2 GridPos, Animation animation)
     tile->addComponent<CAnimation>(animation, true);
     tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
     tile->addComponent<CTransform>(gridToMidPixel(GridPos, tile));
-    tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
-
+    if (m_solidPlace)
+    {
+        tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
+    }
 }
 
 Vec2 Scene_LevelEditor::gridToPixel(Vec2 gridPos)

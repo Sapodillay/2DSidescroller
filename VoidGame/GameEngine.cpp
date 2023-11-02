@@ -22,8 +22,8 @@ void GameEngine::init(const std::string& path)
 	ImGui::SFML::Init(m_window);
 	m_window.setFramerateLimit(60);
 
-	//changeScene("GAME", std::make_shared<Scene_Play>(this, path));
-	changeScene("EDITOR", std::make_shared<Scene_LevelEditor>(this, path));
+	changeScene("GAME", std::make_shared<Scene_Play>(this, path));
+	//changeScene("EDITOR", std::make_shared<Scene_LevelEditor>(this, path));
 
 }
 
