@@ -33,8 +33,8 @@ private:
 	void onEnd();
 
 	//Scene functions
+	void paletteRender();
 	void saveLevel(std::string fileName);
-	void handleConsole();
 	void Place(Vec2 GridPos, Animation animation);
 
 

@@ -6,6 +6,9 @@
 #include <fstream>
 #include <sstream>
 
+#include "imgui/imgui.h"
+#include "imgui/imgui-SFML.h"
+
 
 Scene_LevelEditor::Scene_LevelEditor(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath)
@@ -15,10 +18,9 @@ Scene_LevelEditor::Scene_LevelEditor(GameEngine* gameEngine, const std::string& 
 
 void Scene_LevelEditor::init(std::string& levelPath)
 {
-
     registerMouseAction(sf::Mouse::Left, "LEFT_CLICK");
 
-    registerAction(sf::Keyboard::F, "CONSOLE");
+    registerAction(sf::Keyboard::V, "TOGGLE_PALETTE");
 
     //debug
     registerAction(sf::Keyboard::T, "TOGGLE_TEXTURE");
@@ -35,6 +37,16 @@ void Scene_LevelEditor::init(std::string& levelPath)
     m_text.setFont(m_font);
     m_text.setCharacterSize(12);
     m_text.setFillColor(sf::Color::White);
+
+    std::string defaultLevel = "default";
+    loadLevel(defaultLevel);
+
+    //set default tools
+    m_currentTool = "PLACE";
+    m_selectedAnimation = m_game->getAssets().getAnimations()[0];
+
+
+
 }
 
 void Scene_LevelEditor::loadLevel(std::string& filename)
@@ -105,10 +117,12 @@ void Scene_LevelEditor::sDoAction(const Action& action)
         std::string name = action.getName();
         if (name == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (name == "TOGGLE_COLLISION") { m_drawCollision = !m_drawCollision; }
-        else if (name == "CONSOLE")
+        else if (name == "OPEN_PALETTE")
         {
-            handleConsole();
+            //enable palette
         }
+
+
     }
     else if (action.getType() == "END")
     {
@@ -125,7 +139,7 @@ void Scene_LevelEditor::sDoAction(const Action& action)
                 //Place(GridPos, m_game->getAssets().getAnimation("grass_top_left"));
                 Place(GridPos, m_selectedAnimation);
             }
-            if (m_currentTool == "ERASE")
+            else if (m_currentTool == "ERASE")
             {
                 Vec2 GridPos = pixelToGrid(GetMousePosition());
 
@@ -177,7 +191,15 @@ void Scene_LevelEditor::sAnimation()
 
 void Scene_LevelEditor::sRender()
 {
+    ImGui::SFML::Update(m_game->window(), m_game->deltaClock.restart());
     m_game->window().clear();
+
+
+
+    //imgui draw
+    paletteRender();
+
+
     if (m_drawTextures)
     {
         for (auto& e : m_entityManager.getEntities())
@@ -268,10 +290,9 @@ void Scene_LevelEditor::sRender()
         }
     }
 
-
-
-
+    ImGui::SFML::Render(m_game->window());
     m_game->window().display();
+
 }
 
 void Scene_LevelEditor::drawLine(const Vec2& p1, const Vec2& p2)
@@ -284,10 +305,101 @@ void Scene_LevelEditor::onEnd()
 {
 }
 
+
+
+char loadInputBuffer[256] = "";
+char saveInputBuffer[256] = "";
+
+void Scene_LevelEditor::paletteRender()
+{
+    ImGui::Begin("Palette");
+
+    ImGui::Text("Select Tool: ");
+    const char* items[] = { "Place", "Erase" };
+    static int tool_current = 0;
+    if (ImGui::BeginCombo("##Tool", items[tool_current])) {
+        for (int i = 0; i < sizeof(items) / sizeof(items[0]); i++) {
+            bool is_selected = (tool_current == i);
+            if (ImGui::Selectable(items[i], is_selected)) {
+                tool_current = i;
+                if (items[i] == "Place")
+                {
+                    m_currentTool = "PLACE";
+                }
+                else if (items[i] == "Erase")
+                {
+                    m_currentTool = "ERASE";
+                }
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    ImGui::Text("Select Material: ");
+
+    std::vector<Animation> animations = m_game->getAssets().getAnimations();
+
+    const int size = animations.size();
+    const char** animation_names = new const char* [size];
+
+    for (int i = 0; i < size; i++) {
+        const std::string& name = animations[i].getName();
+        // Store the c_str() of the std::string, which is automatically null-terminated
+        animation_names[i] = name.c_str();
+    }
+
+    static int item_current = 0;
+    if (ImGui::BeginCombo("##Animation", animation_names[item_current])) {
+        for (int i = 0; i < size; i++) {
+            bool selected = (item_current == i);
+            if (ImGui::Selectable(animation_names[i], selected)) {
+                item_current = i;
+                m_selectedAnimation = m_game->getAssets().getAnimation(animation_names[i]);
+            }
+            if (selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    ImGui::Text("Load file: ");
+    ImGui::InputText("##Load", loadInputBuffer, IM_ARRAYSIZE(loadInputBuffer));
+    // Button to the right of the input field
+    ImGui::SameLine();
+    if (ImGui::Button("Load")) {
+        // Call the function with the text from the input field when the button is clicked
+        std::string filename = loadInputBuffer;
+        loadLevel(filename);
+    }
+
+    ImGui::Text("Save file: ");
+    ImGui::InputText("##Save", saveInputBuffer, IM_ARRAYSIZE(saveInputBuffer));
+    // Button to the right of the input field
+    ImGui::SameLine();
+    if (ImGui::Button("Save")) {
+        // Call the function with the text from the input field when the button is clicked
+        std::string filename = saveInputBuffer;
+        saveLevel(filename);
+    }
+
+
+
+
+
+    // No need to delete[] animation_names, as they are pointers to existing strings
+    ImGui::End();
+}
+
+
 void Scene_LevelEditor::saveLevel(std::string fileName)
 {
 
     //Save all tiles.
+    std::cout << "Saving level.." << std::endl;
 
     std::ofstream outfile("levels/" + fileName + ".txt");
 
@@ -315,85 +427,6 @@ void Scene_LevelEditor::saveLevel(std::string fileName)
     outfile.close();
 }
 
-void Scene_LevelEditor::handleConsole()
-{
-
-    //will freeze process, get console command
-    //commands -
-    // SET - set the tile to paint
-    // TextureName, Empty
-
-    //screen prompt to tell user to use console
-
-
-    //get command
-
-
-    //TODO : COMMAND CLASS AND COMMAND REGISTERING
-
-    std::cout << "List of commands - " << std::endl;
-    std::cout << "PLACE, ERASE, SAVE, LOAD" << std::endl;
-
-
-    std::cout << "Enter command: ";
-
-
-    std::string commandName;
-    std::cin >> commandName;
-    std::cout << std::endl;
-
-    if (commandName == "SAVE")
-    {
-        std::cout << "Enter file name to save file to: ";
-        std::string fileName;
-        std::cin >> fileName;
-        std::cout << std::endl;
-
-        saveLevel(fileName);
-    }
-    else if (commandName == "LOAD")
-    {
-        std::cout << "Enter file name to load: ";
-        std::string fileName;
-        std::cin >> fileName;
-        std::cout << std::endl;
-
-        loadLevel(fileName);
-    }
-    else if (commandName == "PLACE")
-    {
-        m_currentTool = "PLACE";
-
-        std::vector<Animation> animations = m_game->getAssets().getAnimations();
-        std::string displayString;
-
-        for (auto i : animations)
-        {
-            displayString.append(i.getName());
-            displayString.append(", ");
-        }
-
-        std::cout << "Current animations : " << displayString << std::endl;
-
-        std::string animationString;
-        std::cout << "Select an animation to place: " << std::endl;
-        std::cin >> animationString;
-
-        m_selectedAnimation = m_game->getAssets().getAnimation(animationString);
-    }
-    else if (commandName == "ERASE")
-    {
-        m_currentTool = "ERASE";
-    }
-    else
-    {
-        std::cout << "Error : command not found.";
-    }
-
-
-
-
-}
 
 void Scene_LevelEditor::Place(Vec2 GridPos, Animation animation)
 {
