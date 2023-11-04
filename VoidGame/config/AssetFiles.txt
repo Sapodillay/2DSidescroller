@@ -1,3 +1,7 @@
+Background bg1 tmp/background_layer_1.png 1 0
+Background bg2 tmp/background_layer_2.png 1 0
+Background bg3 tmp/background_layer_3.png 1 0
+
 Animation slime_animate tmp/slime_red.png 5 0
 Animation grass_top tmp/grass_top.png 1 0
 Animation grass_top_left tmp/grass_top_left.png 1 0
