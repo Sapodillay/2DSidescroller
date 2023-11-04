@@ -28,6 +28,20 @@ void Assets::loadFromFile(const std::string& path)
 			std::cout << "Adding animation: " + name << " " << path << " " << frameCount << " " << speed << std::endl;
 			addAnimation(name, path, frameCount, speed);
 		}
+		else if (token == "Background")
+		{
+
+			std::string name;
+			std::string path;
+			int moveSpeed;
+
+			iss >> name >> path >> moveSpeed;
+			std::cout << "Adding background: " + name << " " << path << " " << moveSpeed << " " << std::endl;
+			addAnimation(name, path);
+
+			Animation anim = getAnimation(name);
+			m_backgrounds.push_back(anim);
+		}
 		else if (token == "AnimationAtlas")
 		{
 			std::string name;
@@ -51,9 +65,6 @@ void Assets::loadFromFile(const std::string& path)
 
 			std::cout << "Adding animation atlas: " + name << " " << path << " " << std::endl;
 			addAnimationFromAtlas(name, path, pos, size);
-
-
-
 		}
 
 
@@ -133,4 +144,9 @@ std::vector<Animation> Assets::getAnimations()
 		animations.push_back(anim.second);
 	}
 	return animations;
+}
+
+std::vector<Animation> Assets::getBackgrounds()
+{
+	return m_backgrounds;
 }
