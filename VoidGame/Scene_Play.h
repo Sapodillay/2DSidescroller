@@ -19,6 +19,9 @@ public:
 protected:
 	sf::Font m_font;
 	sf::Text m_text;
+
+
+
 	Vec2 m_gridSize = { 32.0f, 32.0f };
 	std::shared_ptr<Entity> m_player;
 	std::string m_levelPath;
@@ -46,6 +49,8 @@ private:
 	Vec2 gridToPixel(Vec2 gridPos);
 	Vec2 gridToMidPixel(Vec2 gridPos, std::shared_ptr<Entity> entity);
 	void drawLine(const Vec2& p1, const Vec2& p2);
+
+	void drawDebug();
 
 	int m_Score;
 

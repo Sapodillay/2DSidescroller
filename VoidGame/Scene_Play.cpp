@@ -3,6 +3,11 @@
 #include <SFML/Graphics.hpp>
 #include "Physics.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
+
+#include "imgui/imgui.h"
+#include "imgui/imgui-SFML.h"
 
 Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath)
@@ -49,7 +54,9 @@ void Scene_Play::init(std::string& levelPath)
     m_text.setFillColor(sf::Color::White);
 
     spawnPlayer();
-    loadLevel(levelPath);
+
+    std::string defaultLevel = "default";
+    loadLevel(defaultLevel);
 
 
 }
@@ -57,48 +64,88 @@ void Scene_Play::init(std::string& levelPath)
 void Scene_Play::loadLevel(std::string& filename)
 {
 
+    //Delete existing tiles
+    for (auto& e : m_entityManager.getEntities())
+    {
+        if (e->tag() == "Tile")
+        {
+            m_entityManager.deleteEntity(e);
+        }
+    }
+
+
+
     //load from file.
 
 
     //test example.
-    m_drawCollision = true;
-    m_drawGrid = true;
+    m_drawCollision = false;
+    m_drawGrid = false;
 
 
-    auto tile = m_entityManager.addEntity("Tile");
-    tile->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top_left"), true);
-    tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-    tile->addComponent<CTransform>(gridToMidPixel(Vec2(0, 11), tile));
-    tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
-
-    auto tile2 = m_entityManager.addEntity("Tile");
-    tile2->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top_left"), true);
-    tile2->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-    tile2->addComponent<CTransform>(gridToMidPixel(Vec2(12, 2), tile2));
-    tile2->addComponent<CBoundingBox>(tile2->getComponent<CAnimation>().m_animation.getSize());
 
 
-    for (int i = 1; i < 20; i++)
+    std::vector<Animation> backgrounds = m_game->getAssets().getBackgrounds();
+
+    for (auto bg : backgrounds)
     {
-        auto e = m_entityManager.addEntity("Tile");
-        e->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top"), true);
-        e->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-        e->addComponent<CTransform>(gridToMidPixel(Vec2(i, 11), e));
-        e->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize()); 
+
+        auto background = m_entityManager.addEntity("Background");
+        background->addComponent<CAnimation>(bg, true);
+        background->addComponent<CTransform>();
+
+
+
+
+        sf::Vector2f spriteSize(bg.getSprite().getLocalBounds().width, bg.getSprite().getLocalBounds().height);
+        sf::Vector2u windowSize = m_game->window().getSize();
+
+        // Calculate scale factors for width and height
+        float scaleX = windowSize.x / spriteSize.x;
+        float scaleY = windowSize.y / spriteSize.y;
+
+        // Choose the smaller scale factor to maintain aspect ratio
+        float scaleFactor = std::min(scaleX, scaleY);
+        Vec2 scale(scaleFactor, scaleFactor);
+        // Scale the sprite
+        background->getComponent<CAnimation>().m_animation.getSprite().setScale(scaleFactor, scaleFactor * 1.1);
+
+
+
+
     }
 
-    for (int i = 1; i < 20; i++)
+
+
+    std::ifstream configFile("levels/" + filename + ".txt");
+    std::string line;
+    while (std::getline(configFile, line))
     {
-        auto e = m_entityManager.addEntity("Tile");
-        e->addComponent<CAnimation>(m_game->getAssets().getAnimation("grass_top"), true);
-        e->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-        e->addComponent<CTransform>(gridToMidPixel(Vec2(i, 3), e));
-        e->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
+        std::istringstream iss(line);
+
+        std::string animationName;
+        int x;
+        int y;
+        std::string isBoundingBox;
+
+        iss >> animationName >> x >> y >> isBoundingBox;
+
+
+        Vec2 GridPos(x, y);
+
+        Animation animation = m_game->getAssets().getAnimation(animationName);
+        auto tile = m_entityManager.addEntity("Tile");
+        tile->addComponent<CAnimation>(animation, true);
+        tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+        tile->addComponent<CTransform>(gridToMidPixel(GridPos, tile));
+
+        if (isBoundingBox == "true")
+        {
+            tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
+        }
     }
-
-
-
 }
+
 
 void Scene_Play::spawnPlayer()
 {
@@ -131,8 +178,8 @@ void Scene_Play::update()
     m_entityManager.update();
     sMovement();
     sCollision();
-    sRender();
     sPlayerState();
+    sRender();
 }
 
 void Scene_Play::sScore()
@@ -157,10 +204,9 @@ void Scene_Play::sMovement()
 
 
 
-    if (m_player->getComponent<CInput>().up && playerState.jumpTimer < 5.0f && playerState.state != "Down")
+    if (m_player->getComponent<CInput>().up && playerState.jumpTimer < 2.0f && playerState.state != "Down")
     {
-        //Handle jump logic
-        playerTransform.velocity.y = -10;
+        playerTransform.velocity.y = -12;
         playerState.jumpTimer += 0.2f;
     }
 
@@ -357,26 +403,47 @@ void Scene_Play::sPlayerState()
     auto& transform = m_player->getComponent<CTransform>();
     auto& state = m_player->getComponent<CPlayerState>();
 
-    if (!state.isJumping)
-    {
-        if (transform.pos == transform.prev_pos)
-            state.state = "Standing";
-        else if (transform.pos.x != transform.prev_pos.x && transform.pos.y == transform.prev_pos.y)
-            state.state = "Running";
 
-    }
+    if (!state.isJumping && transform.pos == transform.prev_pos)
+        state.state = "Standing";
+    else if (!state.isJumping && transform.pos.x != transform.prev_pos.x && transform.pos.y == transform.prev_pos.y)
+        state.state = "Running";
+    else if (transform.pos.y < transform.prev_pos.y)
+        state.state = "Up";
     else
-    {
-        if (transform.pos.y < transform.prev_pos.y)
-            state.state = "Up";
-        else
-            state.state = "Down";
-    }
+        state.state = "Down";
 }
 
 void Scene_Play::sRender()
 {
+    ImGui::SFML::Update(m_game->window(), m_game->deltaClock.restart());
     m_game->window().clear();
+
+
+    float windowCenterX = std::max(m_game->window().getSize().x / 2.0f, m_player->getComponent<CTransform>().pos.x);
+    sf::View view = m_game->window().getView();
+    view.setCenter(windowCenterX + 100, m_game->window().getSize().y - view.getCenter().y);
+    m_game->window().setView(view);
+
+    drawDebug();
+
+
+    for (auto& e : m_entityManager.getEntities())
+    {
+        if (e->tag() == "Background")
+        {
+            auto& transform = e->getComponent<CTransform>();
+            auto& animation = e->getComponent<CAnimation>().m_animation;
+
+            animation.getSprite().setPosition(m_game->window().getView().getCenter());
+            m_game->window().draw(animation.getSprite());
+        }
+    }
+
+
+
+
+
     if (m_drawTextures)
     {
         for (auto& e : m_entityManager.getEntities())
@@ -385,12 +452,15 @@ void Scene_Play::sRender()
             {
                 if (e->hasComponent<CTransform>())
                 {
-                    auto& transform = e->getComponent<CTransform>();
-                    auto& animation = e->getComponent<CAnimation>().m_animation;
+                    if (e->tag() != "Background")
+                    {
+                        auto& transform = e->getComponent<CTransform>();
+                        auto& animation = e->getComponent<CAnimation>().m_animation;
 
-                    //animation.
-                    animation.getSprite().setPosition(transform.pos.x, transform.pos.y);
-                    m_game->window().draw(animation.getSprite());
+                        //animation.
+                        animation.getSprite().setPosition(transform.pos.x, transform.pos.y);
+                        m_game->window().draw(animation.getSprite());
+                    }
                 }
             }
         }
@@ -411,10 +481,12 @@ void Scene_Play::sRender()
 
         float windowWidth = m_game->window().getSize().x;
 
-        float leftX = 0.0f;
-        float rightX = windowWidth;
-        int xTile = 0;
-        int yTile = 0;
+        sf::View view = m_game->window().getView();
+
+        float leftX = view.getCenter().x - windowWidth / 2;
+        float rightX = view.getCenter().x + windowWidth / 2;
+        int xTile = leftX / m_gridSize.x;
+        int yTile = rightX / m_gridSize.y;
 
         for (float x = leftX; x < rightX; x += m_gridSize.x)
         {
@@ -475,9 +547,7 @@ void Scene_Play::sRender()
         }
     }
 
-
-
-
+    ImGui::SFML::Render(m_game->window());
     m_game->window().display();
 }
 
@@ -486,6 +556,36 @@ void Scene_Play::drawLine(const Vec2& p1, const Vec2& p2)
     sf::Vertex line[] = { sf::Vertex(sf::Vector2f(p1.x, p1.y)), sf::Vertex(sf::Vector2f(p2.x, p2.y)) };
     m_game->window().draw(line, 2, sf::Lines);
 }
+
+
+//DEBUG ONLY
+void Scene_Play::drawDebug()
+{
+
+    auto& transform = m_player->getComponent<CTransform>();
+    auto& state = m_player->getComponent<CPlayerState>();
+
+    std::string PositionString = "Player position -  x: " +  std::to_string(transform.pos.x) + " y: " + std::to_string(transform.pos.y);
+
+    ImGui::Begin("Player Debug");
+    ImGui::Text(PositionString.c_str());
+
+    std::string isJumping = (state.isJumping ? "true" : "false");
+    std::string JumpingString = "Is Jumping: " + isJumping;
+
+    ImGui::Text(JumpingString.c_str());
+
+    std::string JumpTimerString = "Jump Timer: " + std::to_string(state.jumpTimer);
+
+    ImGui::Text(JumpTimerString.c_str());
+
+    std::string StateString = "Current State: " + state.state;
+
+    ImGui::Text(StateString.c_str());
+
+    ImGui::End();
+}
+//END DEBUG
 
 void Scene_Play::onEnd()
 {
