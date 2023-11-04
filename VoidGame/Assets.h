@@ -23,10 +23,14 @@ public:
 
 	std::vector<Animation> getAnimations();
 
+	std::vector<Animation> getBackgrounds();
+
 
 private:
 	std::map<std::string, sf::Texture> m_textures;
 	std::map<std::string, sf::Font> m_fonts;
 	std::map<std::string, Animation> m_animations;
+	std::vector<Animation> m_backgrounds;
+
 };
 
