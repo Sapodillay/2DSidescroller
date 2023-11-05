@@ -152,8 +152,11 @@ void Scene_Play::spawnPlayer()
 
     m_player = m_entityManager.addEntity("player");
     m_player->addComponent<CTransform>(gridToMidPixel({ 0, 0 }, m_player));
-    CAnimation& animation = m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("slime_animate"), false);
+    CAnimation& animation = m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("idle"), false);
     m_player->addComponent<CInput>();
+
+    Vec2 playerSize = m_gridSize;
+
 
     animation.m_animation.setSize(m_gridSize);
 

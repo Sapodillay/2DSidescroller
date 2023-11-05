@@ -6,6 +6,8 @@ Animation slime_animate tmp/slime_red.png 5 0
 Animation grass_top tmp/grass_top.png 1 0
 Animation grass_top_left tmp/grass_top_left.png 1 0
 
+Animation idle tmp/idle_animation.png 6 1
+
 
 AnimationAtlas ground_top_left tmp/oak_woods_tileset.png 16 16 0 0
 AnimationAtlas ground_top tmp/oak_woods_tileset.png 16 16 16 0
