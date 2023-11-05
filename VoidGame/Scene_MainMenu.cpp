@@ -34,10 +34,48 @@ void Scene_MainMenu::init()
 	m_text.setFillColor(sf::Color::Magenta);
 	m_text.setCharacterSize(32);
 
+
+
+	//load background
+	std::vector<Animation> backgrounds = m_game->getAssets().getBackgrounds();
+
+	for (auto bg : backgrounds)
+	{
+		auto background = m_entityManager.addEntity("Background");
+		auto background2 = m_entityManager.addEntity("Background");
+
+		background->addComponent<CAnimation>(bg, true);
+		background2->addComponent<CAnimation>(bg, true);
+
+
+		Vec2 pos(m_game->window().getView().getCenter().x, m_game->window().getView().getCenter().y);
+
+		background->addComponent<CTransform>(pos);
+
+		pos.x = pos.x - m_game->window().getView().getSize().x;
+		background2->addComponent<CTransform>(pos);
+
+
+		sf::Vector2f spriteSize(bg.getSprite().getLocalBounds().width, bg.getSprite().getLocalBounds().height);
+		sf::Vector2u windowSize = m_game->window().getSize();
+
+		// Calculate scale factors for width and height
+		float scaleX = windowSize.x / spriteSize.x;
+		float scaleY = windowSize.y / spriteSize.y;
+
+		// Choose the smaller scale factor to maintain aspect ratio
+		float scaleFactor = std::min(scaleX, scaleY);
+		Vec2 scale(scaleFactor, scaleFactor);
+		// Scale the sprite
+		background->getComponent<CAnimation>().m_animation.getSprite().setScale(scaleFactor, scaleFactor * 1.1);
+		background2->getComponent<CAnimation>().m_animation.getSprite().setScale(scaleFactor, scaleFactor * 1.1);
+
+	}
 }
 
 void Scene_MainMenu::update()
 {
+	m_entityManager.update();
 	sRender();
 }
 
@@ -46,9 +84,35 @@ void Scene_MainMenu::sRender()
 
 	m_game->window().clear(sf::Color(190, 110, 230));
 
+	//draw background
+
 	if (m_drawTextures)
 	{
 
+		//render backgrounds
+		for (auto& e : m_entityManager.getEntities())
+		{
+			if (e->tag() == "Background")
+			{
+				auto& transform = e->getComponent<CTransform>();
+				auto& animation = e->getComponent<CAnimation>().m_animation;
+
+
+				if (transform.pos.x >= m_game->window().getSize().x * 1.5)
+				{
+					Vec2 pos(m_game->window().getView().getCenter().x, m_game->window().getView().getCenter().y);
+					transform.pos.x = pos.x - m_game->window().getView().getSize().x;
+				}
+
+				transform.pos.x += 1;
+
+
+				animation.getSprite().setPosition(transform.pos.x, transform.pos.y);
+				m_game->window().draw(animation.getSprite());
+			}
+		}
+
+		//render each string, highlight selected string
 		for (int i = 0; i < m_menuStrings.size(); i++)
 		{
 
