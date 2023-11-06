@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\libaries\SFML-2.6.0\include;$(SolutionDir)\imgui\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\libaries\SFML-2.6.0\include;$(SolutionDir)imgui\;$(SolutionDir)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
@@ -149,10 +149,10 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Physics.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="Scene_LevelEditor.cpp" />
-    <ClCompile Include="Scene_MainMenu.cpp" />
-    <ClCompile Include="Scene_Play.cpp" />
+    <ClCompile Include="Scenes\Scene.cpp" />
+    <ClCompile Include="Scenes\Scene_LevelEditor.cpp" />
+    <ClCompile Include="Scenes\Scene_MainMenu.cpp" />
+    <ClCompile Include="Scenes\Scene_Play.cpp" />
     <ClCompile Include="Vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,10 +173,10 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Physics.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="Scene_LevelEditor.h" />
-    <ClInclude Include="Scene_MainMenu.h" />
-    <ClInclude Include="Scene_Play.h" />
+    <ClInclude Include="Scenes\Scene.h" />
+    <ClInclude Include="Scenes\Scene_LevelEditor.h" />
+    <ClInclude Include="Scenes\Scene_MainMenu.h" />
+    <ClInclude Include="Scenes\Scene_Play.h" />
     <ClInclude Include="Vec2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,13 +1,14 @@
 #include "Scene_LevelEditor.h"
-#include "GameEngine.h"
+
 #include <SFML/Graphics.hpp>
-#include "Physics.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
-#include "imgui/imgui.h"
-#include "imgui/imgui-SFML.h"
+#include "../GameEngine.h"
+#include "../Physics.h"
+#include "../imgui/imgui.h"
+#include "../imgui/imgui-SFML.h"
 
 
 Scene_LevelEditor::Scene_LevelEditor(GameEngine* gameEngine, const std::string& levelPath)

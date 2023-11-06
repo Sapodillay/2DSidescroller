@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scene.h"
-#include "GameEngine.h"
+#include "../GameEngine.h"
 
 
 class Scene_MainMenu : public Scene

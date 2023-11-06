@@ -2,7 +2,7 @@
 
 #include <string>
 #include "Scene.h"
-#include "Vec2.h"
+#include "../Vec2.h"
 
 class Scene_LevelEditor : public Scene
 {

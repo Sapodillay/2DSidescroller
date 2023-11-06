@@ -1,13 +1,13 @@
-#include "Scene_Play.h"
-#include "GameEngine.h"
 #include <SFML/Graphics.hpp>
-#include "Physics.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
-#include "imgui/imgui.h"
-#include "imgui/imgui-SFML.h"
+#include "Scene_Play.h"
+#include "../Physics.h"
+#include "../GameEngine.h"
+#include "../imgui/imgui.h"
+#include "../imgui/imgui-SFML.h"
 
 Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath)

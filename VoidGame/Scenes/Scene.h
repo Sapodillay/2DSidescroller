@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EntityManager.h"
-#include "Action.h"
+#include "../EntityManager.h"
+#include "../Action.h"
 #include <memory>
 #include <SFML/Graphics.hpp>
 
