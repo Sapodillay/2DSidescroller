@@ -27,7 +27,7 @@ void Scene_MainMenu::init()
 
 
 	//temp font, change later
-	if (!m_menuFont.loadFromFile("comic.ttf"))
+	if (!m_menuFont.loadFromFile("Assets/comic.ttf"))
 		std::cout << "Could not load font" << std::endl;
 
 	m_selectionColor = sf::Color(0, 90, 80);
