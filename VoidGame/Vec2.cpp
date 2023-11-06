@@ -1,6 +1,8 @@
 #include "Vec2.h"
 #include <cmath>
 
+#include <iostream>
+
 Vec2::Vec2()
 {
 }
@@ -89,4 +91,30 @@ Vec2 Vec2::GetUnitVector()
 	UnitVector.x = x / magnitude;
 	UnitVector.y = y / magnitude;
 	return UnitVector;
+}
+
+Intersect LineIntersect(Vec2 a, Vec2 b, Vec2 c, Vec2 d)
+{
+	Vec2 r = (b - a);
+	Vec2 s = (d - c);
+
+	float rxs = r.x * s.y - r.y * s.x;
+	Vec2 cma = c - a;
+
+	float t = (cma.x * s.y - cma.y * s.x) / rxs;
+	float u = (cma.x * r.y - cma.y * r.x) / rxs;
+
+	if (rxs == 0) {
+		// Lines are parallel, no intersection
+		return { false, Vec2(0, 0) };
+	}
+
+	if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+		// Intersection within line segments
+		return { true, Vec2(a.x + t * r.x, a.y + t * r.y) };
+	}
+	else {
+		// Intersection outside of line segments
+		return { false, Vec2(0, 0) };
+	}
 }

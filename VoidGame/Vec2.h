@@ -26,7 +26,10 @@ public:
 	float magnitude() const;
 	Vec2 GetUnitVector();
 
-
-
 };
 
+struct Line { Vec2 a; Vec2 b; };
+
+struct Intersect { bool result; Vec2 position; };
+
+Intersect LineIntersect(Vec2 a, Vec2 b, Vec2 c, Vec2 d);

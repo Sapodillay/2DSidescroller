@@ -9,8 +9,11 @@ class Scene_LightTest : public Scene
 
 public:
 	Scene_LightTest(GameEngine* gameEngine);
+	sf::CircleShape collisionShape;
 
 protected:
+	std::vector<Line> objectLines;
+	std::vector<Vec2> objectPoints;
 
 
 private:
