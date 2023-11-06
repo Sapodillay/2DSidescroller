@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "Scene_LevelEditor.h"
+#include "Scene_MainMenu.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
@@ -22,7 +23,8 @@ void GameEngine::init(const std::string& path)
 	ImGui::SFML::Init(m_window);
 	m_window.setFramerateLimit(60);
 
-	changeScene("GAME", std::make_shared<Scene_Play>(this, path));
+	changeScene("WINDOW", std::make_shared<Scene_MainMenu>(this));
+	//changeScene("GAME", std::make_shared<Scene_Play>(this, path));
 	//changeScene("EDITOR", std::make_shared<Scene_LevelEditor>(this, path));
 
 }
