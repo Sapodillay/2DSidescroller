@@ -27,11 +27,17 @@ void Scene_MainMenu::init()
 
 
 	//temp font, change later
-	if (!m_menuFont.loadFromFile("arial.ttf"))
+	if (!m_menuFont.loadFromFile("comic.ttf"))
 		std::cout << "Could not load font" << std::endl;
+
+	m_selectionColor = sf::Color(0, 90, 80);
+	m_textColor = sf::Color(255, 255, 255);
 
 	m_text.setFont(m_menuFont);
 	m_text.setFillColor(sf::Color::Magenta);
+	m_text.setOutlineColor(sf::Color::Black);
+	m_text.setOutlineThickness(2.0f);
+
 	m_text.setCharacterSize(32);
 
 
@@ -116,7 +122,7 @@ void Scene_MainMenu::sRender()
 		for (int i = 0; i < m_menuStrings.size(); i++)
 		{
 
-			i == m_Selection ? m_text.setFillColor(sf::Color(50, 50, 50)) : m_text.setFillColor(sf::Color(255, 255, 255));
+			i == m_Selection ? m_text.setFillColor(m_selectionColor) : m_text.setFillColor(m_textColor);
 
 
 			m_text.setString(m_menuStrings[i]);
@@ -138,7 +144,7 @@ void Scene_MainMenu::sScroll(int direction)
 {
 	int newSelection = m_Selection + direction;
 	//stop from exceeding menu size
-	newSelection = std::min(int(m_menuStrings.size()), newSelection);
+	newSelection = std::min(int(m_menuStrings.size()) - 1, newSelection);
 	//stop from going below menu size
 	newSelection = std::max(0, newSelection);
 	m_Selection = newSelection;
@@ -167,8 +173,13 @@ void Scene_MainMenu::sSelect()
 	{
 		m_game->changeScene("GAME", std::make_shared<Scene_LevelEditor>(m_game, "tmp/default.txt"));
 	}
+	else if (selection == "Options")
+	{
+
+	}
 	else
 	{
+		m_game->quit();
 		//quit code.
 	}
 
