@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scene.h"
+#include "Scenes/Scene.h"
 #include "Assets.h"
 
 #include <SFML/Graphics.hpp>
