@@ -21,6 +21,36 @@ Animation::Animation(const std::string& name, const sf::Texture& tex, size_t fra
 	m_sprite.setTextureRect(sf::IntRect(std::floor(m_currentFrame) * m_size.x, 0, m_size.x, m_size.y));
 }
 
+void Animation::update()
+{
+	if (m_speed == 0)
+	{
+		return;
+	}
+
+
+	m_gameFrameCounter++;
+
+	float interval = 200.0f / m_speed;
+
+	if (m_gameFrameCounter >= interval)
+	{
+		m_gameFrameCounter = 1;
+
+		m_currentFrame++;
+
+		if (m_currentFrame >= m_frameCount)
+		{
+			m_currentFrame = 0;
+		}
+	}
+
+	int newX = m_currentFrame * m_size.x;
+
+	m_sprite.setTextureRect(sf::IntRect(newX, 0, m_size.x, m_size.y));
+	m_sprite.setOrigin(m_size.x / 2.0f, m_size.y / 2.0f);
+}
+
 const std::string& Animation::getName() const
 {
 	return m_name;
@@ -38,17 +68,23 @@ void Animation::setSize(Vec2 size)
 	m_sprite.setOrigin(m_size.x / 2.0f, m_size.y / 2.0f);
 	m_sprite.setTextureRect(sf::IntRect(std::floor(m_currentFrame) * m_size.x, 0, m_size.x, m_size.y));
 
-	m_size.x = m_size.x * scaleX;
-	m_size.y = m_size.y * scaleY;
-
 }
 
 const Vec2& Animation::getSize()
 {
-	return m_size;
+	Vec2 scaledVec(0, 0);
+
+	scaledVec.x = m_size.x * m_sprite.getScale().x;
+	scaledVec.y = m_size.y * m_sprite.getScale().y;
+	return scaledVec;
 }
 
 sf::Sprite& Animation::getSprite()
 {
 	return m_sprite;
+}
+
+size_t Animation::getFrameCount()
+{
+	return m_currentFrame;
 }
