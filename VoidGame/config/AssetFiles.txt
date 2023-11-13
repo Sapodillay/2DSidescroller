@@ -6,7 +6,9 @@ Animation slime_animate Assets/slime_red.png 5 0
 Animation grass_top Assets/grass_top.png 1 0
 Animation grass_top_left Assets/grass_top_left.png 1 0
 
-Animation idle Assets/idle_animation.png 6 1
+Animation Standing Assets/idle_animation.png 6 10
+Animation Running Assets/running_animation.png 8 20
+
 
 
 AnimationAtlas ground_top_left Assets/oak_woods_tileset.png 16 16 0 0
