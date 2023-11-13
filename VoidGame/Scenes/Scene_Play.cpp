@@ -152,7 +152,7 @@ void Scene_Play::spawnPlayer()
 
     m_player = m_entityManager.addEntity("player");
     m_player->addComponent<CTransform>(gridToMidPixel({ 0, 0 }, m_player));
-    CAnimation& animation = m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("idle"), false);
+    CAnimation& animation = m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("Standing"), true);
     m_player->addComponent<CInput>();
 
     Vec2 playerSize = m_gridSize;
@@ -179,6 +179,7 @@ void Scene_Play::spawnBullet(std::shared_ptr<Entity> entity)
 void Scene_Play::update()
 {
     m_entityManager.update();
+    sAnimation();
     sMovement();
     sCollision();
     sPlayerState();
@@ -398,6 +399,47 @@ void Scene_Play::sDoAction(const Action& action)
 
 void Scene_Play::sAnimation()
 {
+
+    //update all entities animations
+    for (auto& e : m_entityManager.getEntities())
+    {
+        if (e->hasComponent<CAnimation>() && e->tag() != "player")
+        {
+            e->getComponent<CAnimation>().m_animation.update();
+        }
+    }
+
+
+    //update players animation
+    if (!m_player->hasComponent<CAnimation>())
+    {
+        std::cout << "Error: Player does not have animation componenet." << std::endl;
+        return;
+    }
+
+    CAnimation& playerAnim = m_player->getComponent<CAnimation>();
+    CPlayerState& state = m_player->getComponent<CPlayerState>();
+    playerAnim.m_animation.update();
+
+    if (state.state == playerAnim.m_animation.getName())
+        return;
+
+    if (state.state == "Running")
+    {
+        m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("Running"), true);
+        m_player->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+
+    }
+    else if (state.state == "Standing")
+    {
+        m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("Standing"), true);
+        m_player->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+    }
+
+    //change players animation based on state.
+
+    //TODO
+
 }
 
 void Scene_Play::sPlayerState()
@@ -585,6 +627,9 @@ void Scene_Play::drawDebug()
     std::string StateString = "Current State: " + state.state;
 
     ImGui::Text(StateString.c_str());
+
+    std::string FrameCount = "Current Frame: " + std::to_string(int(m_player->getComponent<CAnimation>().m_animation.getFrameCount()));
+    ImGui::Text(FrameCount.c_str());
 
     ImGui::End();
 }
