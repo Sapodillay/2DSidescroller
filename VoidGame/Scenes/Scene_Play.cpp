@@ -368,7 +368,7 @@ void Scene_Play::sDoAction(const Action& action)
         std::string name = action.getName();
 
         if (name == "UP") { input.up = true; m_player->getComponent<CPlayerState>().isJumping = true; }
-        else if (name == "LEFT") { input.left = true; }
+        else if (name == "LEFT") { input.left = true;}
         else if (name == "RIGHT") { input.right = true; }
         else if (name == "DOWN") { input.down = true; }
         else if (name == "SHOOT") {}// shoot logic
@@ -409,32 +409,47 @@ void Scene_Play::sAnimation()
         }
     }
 
-
-    //update players animation
+    //error checking.
     if (!m_player->hasComponent<CAnimation>())
     {
         std::cout << "Error: Player does not have animation componenet." << std::endl;
         return;
     }
+    //update players animation
 
     CAnimation& playerAnim = m_player->getComponent<CAnimation>();
     CPlayerState& state = m_player->getComponent<CPlayerState>();
-    playerAnim.m_animation.update();
 
+    //update all repeat animations
+    if (playerAnim.m_repeat == true)
+    {
+        playerAnim.m_animation.update();
+    }
+    else if (playerAnim.m_animation.hasEnded() == false)
+    {
+        //make sure doesn't keep updating if repeat is false
+        playerAnim.m_animation.update();
+    }
+
+
+
+    //change to update once,
     if (state.state == playerAnim.m_animation.getName())
         return;
 
-    if (state.state == "Running")
+    //don't loop jumping and falling animations
+    //update animation for each state
+    if (state.state == "Up" || state.state == "Down")
     {
-        m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("Running"), true);
+        m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation(state.state), false);
         m_player->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+    }
+    else
+    {
+        m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation(state.state), true);
+        m_player->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+    }
 
-    }
-    else if (state.state == "Standing")
-    {
-        m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("Standing"), true);
-        m_player->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-    }
 
     //change players animation based on state.
 
@@ -447,6 +462,15 @@ void Scene_Play::sPlayerState()
 
     auto& transform = m_player->getComponent<CTransform>();
     auto& state = m_player->getComponent<CPlayerState>();
+
+    if (transform.pos.x > transform.prev_pos.x)
+    {
+        state.moveDirection = true;
+    }
+    else
+    {
+        state.moveDirection = false;
+    }
 
 
     if (!state.isJumping && transform.pos == transform.prev_pos)
