@@ -17,6 +17,8 @@ class Animation
 	//frame rate of the game
 	size_t m_gameFrameCounter = 0;
 
+	bool m_hasEnded = false;
+
 	Vec2 m_size = { 1, 1 };
 	std::string m_name = "none";
 
@@ -32,6 +34,8 @@ public:
 	void setSize(Vec2 size);
 	const Vec2& getSize();
 	sf::Sprite& getSprite();
+
+	void flip();
 
 	//temp
 	size_t getFrameCount();
