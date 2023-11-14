@@ -119,6 +119,7 @@ public:
 	bool isJumping = false;
 	float jumpTimer = 0.0f;
 	std::string state = "Down";
+	bool moveDirection = true;
 
 	CPlayerState() {}
 };
