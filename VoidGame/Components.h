@@ -18,9 +18,12 @@ class CAnimation : public Component
 public:
 	CAnimation() {}
 	CAnimation(const Animation& animation, bool r) : m_animation(animation), m_repeat(r) {};
+	CAnimation(const Animation& animation, bool r, bool f) : m_animation(animation), m_repeat(r), m_flipped(f) {};
+
 
 	Animation m_animation;
 	bool m_repeat = false;
+	bool m_flipped = false;
 
 };
 
@@ -120,6 +123,7 @@ public:
 	float jumpTimer = 0.0f;
 	std::string state = "Down";
 	bool moveDirection = true;
+	std::string lastInput = "left";
 
 	CPlayerState() {}
 };
