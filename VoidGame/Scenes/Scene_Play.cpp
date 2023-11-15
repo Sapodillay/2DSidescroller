@@ -361,6 +361,7 @@ void Scene_Play::sDoAction(const Action& action)
     }
 
     CInput& input = m_player->getComponent<CInput>();
+    CPlayerState& state = m_player->getComponent<CPlayerState>();
 
 
     if (action.getType() == "START")
@@ -368,8 +369,8 @@ void Scene_Play::sDoAction(const Action& action)
         std::string name = action.getName();
 
         if (name == "UP") { input.up = true; m_player->getComponent<CPlayerState>().isJumping = true; }
-        else if (name == "LEFT") { input.left = true;}
-        else if (name == "RIGHT") { input.right = true; }
+        else if (name == "LEFT") { input.left = true; state.lastInput = "left"; }
+        else if (name == "RIGHT") { input.right = true; state.lastInput = "right"; }
         else if (name == "DOWN") { input.down = true; }
         else if (name == "SHOOT") {}// shoot logic
 
@@ -420,6 +421,7 @@ void Scene_Play::sAnimation()
     CAnimation& playerAnim = m_player->getComponent<CAnimation>();
     CPlayerState& state = m_player->getComponent<CPlayerState>();
 
+
     //update all repeat animations
     if (playerAnim.m_repeat == true)
     {
@@ -431,8 +433,6 @@ void Scene_Play::sAnimation()
         playerAnim.m_animation.update();
     }
 
-
-
     //change to update once,
     if (state.state == playerAnim.m_animation.getName())
         return;
@@ -443,18 +443,27 @@ void Scene_Play::sAnimation()
     {
         m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation(state.state), false);
         m_player->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+        if (m_player->getComponent<CInput>().left || state.lastInput == "left")
+        {
+            if (!m_player->getComponent<CAnimation>().m_animation.isFlipped())
+            {
+                m_player->getComponent<CAnimation>().m_animation.flip();
+            }
+        }
+
     }
     else
     {
         m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation(state.state), true);
         m_player->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+        if (m_player->getComponent<CInput>().left || state.lastInput == "left")
+        {
+            if (!m_player->getComponent<CAnimation>().m_animation.isFlipped())
+            {
+                m_player->getComponent<CAnimation>().m_animation.flip();
+            }
+        }
     }
-
-
-    //change players animation based on state.
-
-    //TODO
-
 }
 
 void Scene_Play::sPlayerState()
@@ -463,6 +472,7 @@ void Scene_Play::sPlayerState()
     auto& transform = m_player->getComponent<CTransform>();
     auto& state = m_player->getComponent<CPlayerState>();
 
+    //TODO: can be optimised.
     if (transform.pos.x > transform.prev_pos.x)
     {
         state.moveDirection = true;
@@ -654,6 +664,9 @@ void Scene_Play::drawDebug()
 
     std::string FrameCount = "Current Frame: " + std::to_string(int(m_player->getComponent<CAnimation>().m_animation.getFrameCount()));
     ImGui::Text(FrameCount.c_str());
+
+    std::string LastInput = "Last Input : " + state.lastInput;
+    ImGui::Text(LastInput.c_str());
 
     ImGui::End();
 }
