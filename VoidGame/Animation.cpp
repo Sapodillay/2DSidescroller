@@ -99,6 +99,12 @@ void Animation::flip()
 {
 	sf::Vector2f scale = m_sprite.getScale();
 	m_sprite.setScale({ -scale.x, scale.y });
+	m_isFlipped = true;
+}
+
+bool Animation::isFlipped()
+{
+	return m_isFlipped;
 }
 
 size_t Animation::getFrameCount()

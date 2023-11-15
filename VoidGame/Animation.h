@@ -18,6 +18,7 @@ class Animation
 	size_t m_gameFrameCounter = 0;
 
 	bool m_hasEnded = false;
+	bool m_isFlipped = false;
 
 	Vec2 m_size = { 1, 1 };
 	std::string m_name = "none";
@@ -36,6 +37,7 @@ public:
 	sf::Sprite& getSprite();
 
 	void flip();
+	bool isFlipped();
 
 	//temp
 	size_t getFrameCount();
