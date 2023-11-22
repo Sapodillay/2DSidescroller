@@ -250,15 +250,7 @@ void Scene_Play::sMovement()
                 e->getComponent<CShape>().circle.setPosition(transform.pos.x, transform.pos.y);
             }
         }
-
-
-
-
     }
-
-
-
-
 }
 
 void Scene_Play::sLifespan()
@@ -268,15 +260,11 @@ void Scene_Play::sLifespan()
 void Scene_Play::sCollision()
 {
 
-
     //Player collision with tiles.
-
-
     for (auto& e : m_entityManager.getEntities())
     {
         if (e->tag() == "Tile")
         { 
-
 
             //if (overlap.x > 0 && overlap.y > 0)
             if (Physics::AABB(m_player, e))
@@ -288,10 +276,7 @@ void Scene_Play::sCollision()
                     return;
                 }
 
-
                 bool isVertical = overlap.y <= overlap.x;
-
-
 
                 Vec2 correctedPosition = { 0, 0 };
 
@@ -332,9 +317,6 @@ void Scene_Play::sCollision()
 
                 }
 
-
-
-
             }
             else
             {
@@ -363,14 +345,13 @@ void Scene_Play::sDoAction(const Action& action)
     CInput& input = m_player->getComponent<CInput>();
     CPlayerState& state = m_player->getComponent<CPlayerState>();
 
-
     if (action.getType() == "START")
     {
         std::string name = action.getName();
 
         if (name == "UP") { input.up = true; m_player->getComponent<CPlayerState>().isJumping = true; }
-        else if (name == "LEFT") { input.left = true; state.lastInput = "left"; }
-        else if (name == "RIGHT") { input.right = true; state.lastInput = "right"; }
+        else if (name == "LEFT") { input.left = true; }
+        else if (name == "RIGHT") { input.right = true; }
         else if (name == "DOWN") { input.down = true; }
         else if (name == "SHOOT") {}// shoot logic
 
@@ -433,9 +414,37 @@ void Scene_Play::sAnimation()
         playerAnim.m_animation.update();
     }
 
+
+
+
     //change to update once,
     if (state.state == playerAnim.m_animation.getName())
+    {
+
+        if (m_player->getComponent<CTransform>().velocity.x < 0)
+        {
+            //player is moving left.
+            if (!m_player->getComponent<CAnimation>().m_animation.isFlipped())
+            {
+                //flip the animation.
+                m_player->getComponent<CAnimation>().m_animation.flip();
+            }
+        }
+        if (m_player->getComponent<CTransform>().velocity.x > 0)
+        {
+            //player is moving left.
+            if (m_player->getComponent<CAnimation>().m_animation.isFlipped())
+            {
+                //flip the animation.
+                m_player->getComponent<CAnimation>().m_animation.flip();
+            }
+        }
+
+
+
+
         return;
+    }
 
     //don't loop jumping and falling animations
     //update animation for each state
@@ -443,26 +452,11 @@ void Scene_Play::sAnimation()
     {
         m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation(state.state), false);
         m_player->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-        if (m_player->getComponent<CInput>().left || state.lastInput == "left")
-        {
-            if (!m_player->getComponent<CAnimation>().m_animation.isFlipped())
-            {
-                m_player->getComponent<CAnimation>().m_animation.flip();
-            }
-        }
-
     }
     else
     {
         m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation(state.state), true);
         m_player->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-        if (m_player->getComponent<CInput>().left || state.lastInput == "left")
-        {
-            if (!m_player->getComponent<CAnimation>().m_animation.isFlipped())
-            {
-                m_player->getComponent<CAnimation>().m_animation.flip();
-            }
-        }
     }
 }
 
@@ -665,8 +659,6 @@ void Scene_Play::drawDebug()
     std::string FrameCount = "Current Frame: " + std::to_string(int(m_player->getComponent<CAnimation>().m_animation.getFrameCount()));
     ImGui::Text(FrameCount.c_str());
 
-    std::string LastInput = "Last Input : " + state.lastInput;
-    ImGui::Text(LastInput.c_str());
 
     ImGui::End();
 }
