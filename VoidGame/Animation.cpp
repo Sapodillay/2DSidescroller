@@ -99,7 +99,8 @@ void Animation::flip()
 {
 	sf::Vector2f scale = m_sprite.getScale();
 	m_sprite.setScale({ -scale.x, scale.y });
-	m_isFlipped = true;
+	//toggle the flip
+	m_isFlipped = !m_isFlipped;
 }
 
 bool Animation::isFlipped()
