@@ -123,7 +123,6 @@ public:
 	float jumpTimer = 0.0f;
 	std::string state = "Down";
 	bool moveDirection = true;
-	std::string lastInput = "left";
 
 	CPlayerState() {}
 };
