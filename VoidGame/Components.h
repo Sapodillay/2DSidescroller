@@ -104,6 +104,31 @@ public:
 	}
 };
 
+class CHealth : public Component
+{
+public:
+	int m_health = 0;
+	int m_maxHealth = 0;
+	std::string m_healthString;
+
+	CHealth() {}
+	CHealth(int maxHealth) : m_health(maxHealth), m_maxHealth(maxHealth)
+	{
+		UpdateString();
+	}
+	CHealth(int maxHealth, int currentHealth) : m_health(currentHealth), m_maxHealth(maxHealth)
+	{
+		UpdateString();
+	}
+
+	//updates health string drawn on UI
+	void UpdateString()
+	{
+		m_healthString = "Health: " + std::to_string(m_health) + "/" + std::to_string(m_maxHealth);
+	}
+};
+
+
 class CInput : public Component
 {
 public:
