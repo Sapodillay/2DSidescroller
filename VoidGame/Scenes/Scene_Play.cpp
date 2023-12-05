@@ -53,7 +53,14 @@ void Scene_Play::init(std::string& levelPath)
     m_text.setCharacterSize(12);
     m_text.setFillColor(sf::Color::White);
 
+    m_healthText.setFont(m_font);
+    m_text.setCharacterSize(16);
+    m_text.setFillColor(sf::Color::White);
+    m_text.setOutlineThickness(2.0f);
+    m_text.setOutlineColor(sf::Color::Black);
+
     spawnPlayer();
+    spawnEnemy();
 
     std::string defaultLevel = "default";
     loadLevel(defaultLevel);
@@ -151,6 +158,7 @@ void Scene_Play::spawnPlayer()
 {
 
     m_player = m_entityManager.addEntity("player");
+    m_player->addComponent<CHealth>(3);
     m_player->addComponent<CTransform>(gridToMidPixel({ 0, 0 }, m_player));
     CAnimation& animation = m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("Standing"), true);
     m_player->addComponent<CInput>();
@@ -174,6 +182,17 @@ void Scene_Play::spawnPlayer()
 
 void Scene_Play::spawnBullet(std::shared_ptr<Entity> entity)
 {
+}
+
+//spawn test enemy
+void Scene_Play::spawnEnemy()
+{
+    auto enemy = m_entityManager.addEntity("Enemy");
+
+    enemy->addComponent<CHealth>(3);
+    enemy->addComponent<CAnimation>(m_game->getAssets().getAnimation("slime_animate"), true);
+    enemy->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+    enemy->addComponent<CTransform>(gridToMidPixel({11, 10}, enemy));
 }
 
 void Scene_Play::update()
@@ -414,14 +433,11 @@ void Scene_Play::sAnimation()
         playerAnim.m_animation.update();
     }
 
-
-
-
     //change to update once,
     if (state.state == playerAnim.m_animation.getName())
     {
 
-        if (m_player->getComponent<CTransform>().velocity.x < 0)
+        if (!m_player->getComponent<CPlayerState>().moveDirection)
         {
             //player is moving left.
             if (!m_player->getComponent<CAnimation>().m_animation.isFlipped())
@@ -430,7 +446,7 @@ void Scene_Play::sAnimation()
                 m_player->getComponent<CAnimation>().m_animation.flip();
             }
         }
-        if (m_player->getComponent<CTransform>().velocity.x > 0)
+        if (m_player->getComponent<CPlayerState>().moveDirection)
         {
             //player is moving left.
             if (m_player->getComponent<CAnimation>().m_animation.isFlipped())
@@ -439,10 +455,6 @@ void Scene_Play::sAnimation()
                 m_player->getComponent<CAnimation>().m_animation.flip();
             }
         }
-
-
-
-
         return;
     }
 
@@ -467,11 +479,11 @@ void Scene_Play::sPlayerState()
     auto& state = m_player->getComponent<CPlayerState>();
 
     //TODO: can be optimised.
-    if (transform.pos.x > transform.prev_pos.x)
+    if (transform.velocity.x > 0)
     {
         state.moveDirection = true;
     }
-    else
+    else if (transform.velocity.x < 0)
     {
         state.moveDirection = false;
     }
@@ -512,10 +524,6 @@ void Scene_Play::sRender()
             m_game->window().draw(animation.getSprite());
         }
     }
-
-
-
-
 
     if (m_drawTextures)
     {
@@ -617,6 +625,29 @@ void Scene_Play::sRender()
                 m_game->window().draw(circleShape);
 
             }
+        }
+    }
+
+    //draw ui
+    if (true)
+    {
+        //draw player health.
+        if (m_player->hasComponent<CHealth>())
+        {
+
+
+            //update health string.
+            //TODO: move to damage function
+            m_player->getComponent<CHealth>().UpdateString();
+
+            //set text to top left of screen.
+            sf::Vector2f textPosition = m_game->window().getView().getCenter();
+            textPosition.x = textPosition.x - m_game->window().getView().getSize().x / 2;
+            textPosition.y = textPosition.y - m_game->window().getView().getSize().y / 2;
+           
+            m_healthText.setPosition(textPosition);
+            m_healthText.setString(m_player->getComponent<CHealth>().m_healthString);
+            m_game->window().draw(m_healthText);
         }
     }
 

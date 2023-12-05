@@ -26,6 +26,9 @@ protected:
 	std::shared_ptr<Entity> m_player;
 	std::string m_levelPath;
 	PlayerConfig m_playerConfig;
+
+	sf::Text m_healthText;
+
 	bool m_drawTextures = true;
 	bool m_drawCollision = false;
 	bool m_drawGrid = false;
@@ -36,6 +39,7 @@ private:
 	void loadLevel(std::string& filename);
 	void spawnPlayer();
 	void spawnBullet(std::shared_ptr<Entity> entity);
+	void spawnEnemy();
 	void update();
 	void sScore();
 	void sMovement();
