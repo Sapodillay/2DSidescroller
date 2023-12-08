@@ -31,6 +31,8 @@ public:
 	GameEngine(const std::string& path);
 
 	void changeScene(const std::string& sceneName, std::shared_ptr<Scene> scene, bool endCurrentScene = false);
+	//change to an already existing scene.
+	void changeScene(const std::string& sceneName);
 
 	void quit();
 	void run();

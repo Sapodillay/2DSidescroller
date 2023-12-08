@@ -23,9 +23,9 @@ void GameEngine::init(const std::string& path)
 	ImGui::SFML::Init(m_window);
 	m_window.setFramerateLimit(60);
 
-	changeScene("WINDOW", std::make_shared<Scene_MainMenu>(this));
+	changeScene("MENU", std::make_shared<Scene_MainMenu>(this));
 	//changeScene("GAME", std::make_shared<Scene_Play>(this, path));
-	//changeScene("EDITOR", std::make_shared<Scene_LevelEditor>(this, path));
+	//changeScene("LEVEL_EDITOR", std::make_shared<Scene_LevelEditor>(this, path));
 
 }
 
@@ -71,6 +71,7 @@ void GameEngine::changeScene(const std::string& sceneName, std::shared_ptr<Scene
 {
 	if (scene != nullptr)
 	{
+		//add new scene to SceneMap
 		m_sceneMap[sceneName] = scene;
 	}
 	else
@@ -84,6 +85,18 @@ void GameEngine::changeScene(const std::string& sceneName, std::shared_ptr<Scene
 		{
 			m_sceneMap.erase(m_sceneMap.find(m_currentScene));
 		}
+	}
+	m_currentScene = sceneName;
+}
+
+void GameEngine::changeScene(const std::string& sceneName)
+{
+
+	if (m_sceneMap.find(sceneName) == m_sceneMap.end())
+	{
+		std::cout << "Error: Tried changing to a non existing scene:" << std::endl;
+		std::cout << "Scene" << sceneName << " was not found" << std::endl;
+		return;
 	}
 	m_currentScene = sceneName;
 }
