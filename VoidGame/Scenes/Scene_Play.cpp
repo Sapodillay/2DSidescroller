@@ -559,16 +559,12 @@ void Scene_Play::sRender()
 
     if (m_drawGrid)
     {
-
         float windowWidth = m_game->window().getSize().x;
-
         sf::View view = m_game->window().getView();
-
         float leftX = view.getCenter().x - windowWidth / 2;
         float rightX = view.getCenter().x + windowWidth / 2;
         int xTile = leftX / m_gridSize.x;
         int yTile = rightX / m_gridSize.y;
-
         for (float x = leftX; x < rightX; x += m_gridSize.x)
         {
             drawLine(Vec2(x, 0), Vec2(x, m_game->window().getSize().y));
@@ -588,7 +584,6 @@ void Scene_Play::sRender()
             }
             xTile++;
         }
-
     }
 
     if (m_drawCollision)

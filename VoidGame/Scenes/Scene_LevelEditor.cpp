@@ -35,7 +35,7 @@ void Scene_LevelEditor::init(std::string& levelPath)
     m_gridSize.x = m_game->window().getSize().x / 20.0f;
     m_gridSize.y = m_game->window().getSize().y / 12.0f;
 
-    if (!m_font.loadFromFile("arial.ttf"))
+    if (!m_font.loadFromFile("Assets/arial.ttf"))
         std::cout << "Could not load font" << std::endl;
 
     m_text.setFont(m_font);
