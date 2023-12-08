@@ -4,6 +4,8 @@
 #include <sstream>
 
 #include "Scene_Play.h"
+#include "Scene_EndScreen.h"
+
 #include "../Physics.h"
 #include "../GameEngine.h"
 #include "../imgui/imgui.h"
@@ -382,7 +384,7 @@ void Scene_Play::sDoAction(const Action& action)
             //Testing ending scene.
 
             //try change scene from play scene
-            m_game->changeScene("MENU");
+            m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game));
         
         }
     }
