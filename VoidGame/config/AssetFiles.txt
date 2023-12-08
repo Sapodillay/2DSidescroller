@@ -6,6 +6,9 @@ Animation slime_animate Assets/slime_red.png 5 5
 Animation grass_top Assets/grass_top.png 1 0
 Animation grass_top_left Assets/grass_top_left.png 1 0
 
+Animation door Assets/door.png 1 0
+
+
 Animation Standing Assets/idle_animation.png 6 30
 Animation Running Assets/running_animation.png 8 30
 Animation Up Assets/jump_animation.png 3 30
