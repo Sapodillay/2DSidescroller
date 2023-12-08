@@ -153,6 +153,7 @@
     <ClCompile Include="Scenes\Scene_LevelEditor.cpp" />
     <ClCompile Include="Scenes\Scene_MainMenu.cpp" />
     <ClCompile Include="Scenes\Scene_Play.cpp" />
+    <ClCompile Include="Scenes\Scene_EndScreen.cpp" />
     <ClCompile Include="Vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +178,7 @@
     <ClInclude Include="Scenes\Scene_LevelEditor.h" />
     <ClInclude Include="Scenes\Scene_MainMenu.h" />
     <ClInclude Include="Scenes\Scene_Play.h" />
+    <ClInclude Include="Scenes\Scene_EndScreen.h" />
     <ClInclude Include="Vec2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
