@@ -377,7 +377,14 @@ void Scene_Play::sDoAction(const Action& action)
 
         else if (name == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (name == "TOGGLE_COLLISION") { m_drawCollision = !m_drawCollision; }
-        else if (name == "RESET") { m_player->getComponent<CTransform>().pos = gridToMidPixel(Vec2(3, 3), m_player); }
+        else if (name == "RESET") 
+        { 
+            //Testing ending scene.
+
+            //try change scene from play scene
+            m_game->changeScene("MENU");
+        
+        }
     }
     else if (action.getType() == "END")
     {

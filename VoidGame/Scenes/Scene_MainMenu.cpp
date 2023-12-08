@@ -171,7 +171,7 @@ void Scene_MainMenu::sSelect()
 	}
 	else if (selection == "Level Editor")
 	{
-		m_game->changeScene("GAME", std::make_shared<Scene_LevelEditor>(m_game, "tmp/default.txt"));
+		m_game->changeScene("LEVEL_EDITOR", std::make_shared<Scene_LevelEditor>(m_game, "tmp/default.txt"));
 	}
 	else if (selection == "Options")
 	{
