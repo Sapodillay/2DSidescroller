@@ -3,8 +3,8 @@
 #include "Scene_LevelEditor.h"
 #include "Scene_Play.h"
 
-Scene_EndScreen::Scene_EndScreen(GameEngine* gameEngine)
-	: Scene(gameEngine)
+Scene_EndScreen::Scene_EndScreen(GameEngine* gameEngine, std::string displayString)
+	: Scene(gameEngine), m_displayString(displayString)
 {
 	init();
 }
@@ -25,7 +25,7 @@ void Scene_EndScreen::init()
 	m_text.setOutlineThickness(2.0f);
 	m_text.setCharacterSize(32);
 
-	m_menuStrings.push_back("You died");
+	m_continueString = "Press <ENTER> to continue;";
 
 	std::vector<Animation> backgrounds = m_game->getAssets().getBackgrounds();
 
@@ -103,16 +103,13 @@ void Scene_EndScreen::sRender()
 			}
 		}
 
-		//render each string, highlight selected string
-		for (int i = 0; i < m_menuStrings.size(); i++)
-		{
-			m_text.setString(m_menuStrings[i]);
+		m_text.setString(m_displayString);
+		sf::FloatRect textBounds = m_text.getLocalBounds();
+		m_text.setOrigin(textBounds.left + textBounds.width / 2, textBounds.top + textBounds.height / 2);
+		m_text.setPosition(m_game->window().getView().getCenter().x, m_game->window().getView().getCenter().y);
+		m_game->window().draw(m_text);
 
-			sf::FloatRect textBounds = m_text.getLocalBounds();
-			m_text.setOrigin(textBounds.left + textBounds.width / 2, textBounds.top + textBounds.height / 2);
-			m_text.setPosition(m_game->window().getSize().x / 2.0f, m_game->window().getSize().y / 2.0f + (i * 40));
-			m_game->window().draw(m_text);
-		}
+
 		m_game->window().display();
 	}
 

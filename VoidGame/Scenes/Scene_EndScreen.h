@@ -8,7 +8,7 @@ class Scene_EndScreen : public Scene
 {
 
 public:
-	Scene_EndScreen(GameEngine* gameEngine);
+	Scene_EndScreen(GameEngine* gameEngine, std::string displayString);
 
 protected:
 	sf::Font m_menuFont;
@@ -20,7 +20,8 @@ protected:
 	bool m_drawTextures = true;
 	int m_Selection = 0;
 
-	std::vector<std::string> m_menuStrings;
+	std::string m_displayString;
+	std::string m_continueString;
 
 private:
 	void init();
