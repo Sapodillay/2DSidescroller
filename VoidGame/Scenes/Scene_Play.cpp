@@ -4,6 +4,8 @@
 #include <sstream>
 
 #include "Scene_Play.h"
+#include "Scene_EndScreen.h"
+
 #include "../Physics.h"
 #include "../GameEngine.h"
 #include "../imgui/imgui.h"
@@ -377,7 +379,14 @@ void Scene_Play::sDoAction(const Action& action)
 
         else if (name == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (name == "TOGGLE_COLLISION") { m_drawCollision = !m_drawCollision; }
-        else if (name == "RESET") { m_player->getComponent<CTransform>().pos = gridToMidPixel(Vec2(3, 3), m_player); }
+        else if (name == "RESET") 
+        { 
+            //Testing ending scene.
+
+            //try change scene from play scene
+            m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "YOU DIED???"));
+        
+        }
     }
     else if (action.getType() == "END")
     {

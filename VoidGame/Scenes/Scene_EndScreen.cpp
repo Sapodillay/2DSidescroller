@@ -1,48 +1,32 @@
-#include "Scene_MainMenu.h"
+#include "Scene_EndScreen.h"
 
 #include "Scene_LevelEditor.h"
 #include "Scene_Play.h"
 
-
-Scene_MainMenu::Scene_MainMenu(GameEngine* gameEngine)
-	: Scene(gameEngine)
+Scene_EndScreen::Scene_EndScreen(GameEngine* gameEngine, std::string displayString)
+	: Scene(gameEngine), m_displayString(displayString)
 {
 	init();
 }
 
-void Scene_MainMenu::init()
+void Scene_EndScreen::init()
 {
 
-	registerAction(sf::Keyboard::W, "UP");
-	registerAction(sf::Keyboard::Up, "UP");
-	registerAction(sf::Keyboard::S, "DOWN");
-	registerAction(sf::Keyboard::Down, "DOWN");
-	registerAction(sf::Keyboard::Enter, "SELECT");
-
-
-	m_menuStrings.push_back("Play");
-	m_menuStrings.push_back("Settings");
-	m_menuStrings.push_back("Level Editor");
-	m_menuStrings.push_back("Exit");
+	registerAction(sf::Keyboard::Enter, "ENTER");
 
 
 	//temp font, change later
 	if (!m_menuFont.loadFromFile("Assets/comic.ttf"))
 		std::cout << "Could not load font" << std::endl;
 
-	m_selectionColor = sf::Color(0, 90, 80);
-	m_textColor = sf::Color(255, 255, 255);
-
 	m_text.setFont(m_menuFont);
 	m_text.setFillColor(sf::Color::Magenta);
 	m_text.setOutlineColor(sf::Color::Black);
 	m_text.setOutlineThickness(2.0f);
-
 	m_text.setCharacterSize(32);
 
+	m_continueString = "Press <ENTER> to continue;";
 
-
-	//load background
 	std::vector<Animation> backgrounds = m_game->getAssets().getBackgrounds();
 
 	for (auto bg : backgrounds)
@@ -77,17 +61,18 @@ void Scene_MainMenu::init()
 		background2->getComponent<CAnimation>().m_animation.getSprite().setScale(scaleFactor, scaleFactor * 1.1);
 
 	}
+
+
 }
 
-void Scene_MainMenu::update()
+void Scene_EndScreen::update()
 {
 	m_entityManager.update();
 	sRender();
 }
 
-void Scene_MainMenu::sRender()
+void Scene_EndScreen::sRender()
 {
-
 	m_game->window().clear(sf::Color(190, 110, 230));
 
 	//draw background
@@ -118,76 +103,33 @@ void Scene_MainMenu::sRender()
 			}
 		}
 
-		//render each string, highlight selected string
-		for (int i = 0; i < m_menuStrings.size(); i++)
-		{
+		m_text.setString(m_displayString);
+		sf::FloatRect textBounds = m_text.getLocalBounds();
+		m_text.setOrigin(textBounds.left + textBounds.width / 2, textBounds.top + textBounds.height / 2);
+		m_text.setPosition(m_game->window().getView().getCenter().x, m_game->window().getView().getCenter().y);
+		m_game->window().draw(m_text);
 
-			i == m_Selection ? m_text.setFillColor(m_selectionColor) : m_text.setFillColor(m_textColor);
 
-
-			m_text.setString(m_menuStrings[i]);
-
-			sf::FloatRect textBounds = m_text.getLocalBounds();
-			m_text.setOrigin(textBounds.left + textBounds.width / 2, textBounds.top + textBounds.height / 2);
-			m_text.setPosition(m_game->window().getSize().x / 2.0f, m_game->window().getSize().y / 2.0f + (i * 40));
-			m_game->window().draw(m_text);
-		}
 		m_game->window().display();
 	}
 
-
-
-
 }
 
-void Scene_MainMenu::sScroll(int direction)
-{
-	int newSelection = m_Selection + direction;
-	//stop from exceeding menu size
-	newSelection = std::min(int(m_menuStrings.size()) - 1, newSelection);
-	//stop from going below menu size
-	newSelection = std::max(0, newSelection);
-	m_Selection = newSelection;
-}
 
-void Scene_MainMenu::sDoAction(const Action& action)
+void Scene_EndScreen::sDoAction(const Action& action)
 {
 	if (action.getType() == "START")
 	{
-		if (action.getName() == "UP") { sScroll(-1); }
-		else if (action.getName() == "DOWN") { sScroll(1); }
-		else if (action.getName() == "SELECT") { sSelect(); }
+		if (action.getName() == "ENTER")
+		{
+
+
+			//TODO: Change to restart or go next level.
+			m_game->changeScene("MENU");
+		}
 	}
 }
 
-void Scene_MainMenu::sSelect()
-{
-
-	std::string selection = m_menuStrings[m_Selection];
-
-	if (selection == "Play")
-	{
-		m_game->changeScene("GAME", std::make_shared<Scene_Play>(m_game, "tmp/default.txt"));
-	}
-	else if (selection == "Level Editor")
-	{
-		m_game->changeScene("LEVEL_EDITOR", std::make_shared<Scene_LevelEditor>(m_game, "tmp/default.txt"));
-	}
-	else if (selection == "Options")
-	{
-
-	}
-	else
-	{
-		m_game->quit();
-		//quit code.
-	}
-
-
-
-
-}
-
-void Scene_MainMenu::onEnd()
+void Scene_EndScreen::onEnd()
 {
 }
