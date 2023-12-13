@@ -43,6 +43,7 @@ private:
 	void update();
 	void sScore();
 	void sMovement();
+	void sPathMovement();
 	void sLifespan();
 	void sCollision();
 	void sDoAction(const Action& action);

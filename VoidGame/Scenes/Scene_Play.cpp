@@ -10,7 +10,6 @@
 #include "../GameEngine.h"
 #include "../imgui/imgui.h"
 #include "../imgui/imgui-SFML.h"
-
 Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath)
 {
@@ -202,7 +201,9 @@ void Scene_Play::spawnEnemy()
     enemy->addComponent<CHealth>(3);
     enemy->addComponent<CAnimation>(m_game->getAssets().getAnimation("slime_animate"), true);
     enemy->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-    enemy->addComponent<CTransform>(gridToMidPixel({11, 10}, enemy));
+    enemy->addComponent<CTransform>(gridToMidPixel({5, 10}, enemy));
+
+    enemy->addComponent<CPathMovement>(gridToMidPixel({ 5, 10 }, enemy), gridToMidPixel({ 18, 10 }, enemy), 0.2);
 }
 
 void Scene_Play::update()
@@ -210,6 +211,7 @@ void Scene_Play::update()
     m_entityManager.update();
     sAnimation();
     sMovement();
+    sPathMovement();
     sCollision();
     sPlayerState();
     sRender();
@@ -277,6 +279,44 @@ void Scene_Play::sMovement()
             if (e->hasComponent<CShape>())
             {
                 e->getComponent<CShape>().circle.setPosition(transform.pos.x, transform.pos.y);
+            }
+        }
+    }
+}
+
+void Scene_Play::sPathMovement()
+{
+    for (auto& e : m_entityManager.getEntities())
+    {
+        //for each enemy loop through and increase their progress.
+        if (e->hasComponent<CPathMovement>())
+        {
+            CPathMovement& path = e->getComponent<CPathMovement>();
+            
+
+            if (path.progress >= 100)
+            {
+                path.reverse = true;
+            }
+            if (path.progress <= 0)
+            {
+                path.reverse = false;
+            }
+
+            if (path.reverse == false)
+            {
+                path.progress += path.speed;
+            }
+            else
+            {
+                path.progress -= path.speed;
+            }
+
+
+            Vec2 newPosition = path.p1.Lerp(path.p2, path.progress / 100);
+            if (e->hasComponent<CTransform>())
+            {
+                e->getComponent<CTransform>().pos = newPosition;
             }
         }
     }
