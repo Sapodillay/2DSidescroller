@@ -2,7 +2,7 @@ Background bg1 Assets/background_layer_1.png 1 0
 Background bg2 Assets/background_layer_2.png 1 0
 Background bg3 Assets/background_layer_3.png 1 0
 
-Animation slime_animate Assets/slime_red.png 5 5
+Animation slime_animate Assets/slime_animation.png 5 15
 Animation grass_top Assets/grass_top.png 1 0
 Animation grass_top_left Assets/grass_top_left.png 1 0
 
