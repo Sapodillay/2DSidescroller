@@ -152,6 +152,23 @@ public:
 	CPlayerState() {}
 };
 
+
+//Simple path movement, enemy lerps between both points.
+class CPathMovement : public Component
+{
+public:
+	Vec2 p1;
+	Vec2 p2;
+	float progress = 0.0f;
+	float speed = 1.0f;
+	bool reverse = false;
+	CPathMovement() {};
+	CPathMovement(Vec2 point1, Vec2 point2, float moveSpeed) : p1(point1), p2(point2), speed(moveSpeed)
+	{
+	}
+
+};
+
 class CGravity : public Component
 {
 public:
