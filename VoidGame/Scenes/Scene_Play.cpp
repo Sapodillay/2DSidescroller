@@ -143,7 +143,15 @@ void Scene_Play::loadLevel(std::string& filename)
         Vec2 GridPos(x, y);
 
         Animation animation = m_game->getAssets().getAnimation(animationName);
-        auto tile = m_entityManager.addEntity("Tile");
+
+        std::string tileTag = "Tile";
+
+        if (animationName == "door")
+        {
+            tileTag = "Door";
+        }
+
+        auto tile = m_entityManager.addEntity(tileTag);
         tile->addComponent<CAnimation>(animation, true);
         tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
         tile->addComponent<CTransform>(gridToMidPixel(GridPos, tile));
@@ -290,6 +298,8 @@ void Scene_Play::sCollision()
             //if (overlap.x > 0 && overlap.y > 0)
             if (Physics::AABB(m_player, e))
             {
+
+
                 Vec2 overlap = Physics::GetOverlap(m_player, e);
                 if (overlap.x < 0 && overlap.y < 0)
                 {
@@ -347,6 +357,15 @@ void Scene_Play::sCollision()
                 }
             }
         }
+        else if (e->tag() == "Door")
+        {
+            if (Physics::AABB(m_player, e))
+            {
+                //if player reaches door finish the level and display the score.
+                m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: 3/3"));
+            }
+        }
+
 
     }
 
@@ -381,11 +400,6 @@ void Scene_Play::sDoAction(const Action& action)
         else if (name == "TOGGLE_COLLISION") { m_drawCollision = !m_drawCollision; }
         else if (name == "RESET") 
         { 
-            //Testing ending scene.
-
-            //try change scene from play scene
-            m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "YOU DIED???"));
-        
         }
     }
     else if (action.getType() == "END")
