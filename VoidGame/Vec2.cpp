@@ -90,3 +90,8 @@ Vec2 Vec2::GetUnitVector()
 	UnitVector.y = y / magnitude;
 	return UnitVector;
 }
+
+Vec2 Vec2::Lerp(const Vec2& rhs, float t) const
+{
+	return Vec2(x, y) * t + rhs * (1.f - t);
+}
