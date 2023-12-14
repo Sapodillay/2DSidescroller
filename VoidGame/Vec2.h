@@ -26,7 +26,7 @@ public:
 	float magnitude() const;
 	Vec2 GetUnitVector();
 
-
+	Vec2 Lerp(const Vec2& rhs, float t) const;
 
 };
 
