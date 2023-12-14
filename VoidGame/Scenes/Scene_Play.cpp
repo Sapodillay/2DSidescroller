@@ -391,7 +391,6 @@ void Scene_Play::sCollision()
                     std::cout << "Collision error";
                     return;
                 }
-
                 bool isVertical = overlap.y <= overlap.x;
 
                 Vec2 correctedPosition = { 0, 0 };
@@ -455,7 +454,29 @@ void Scene_Play::sCollision()
         {
             if (Physics::AABB(m_player, e))
             {
-                sDamage(1);
+                Vec2 overlap = Physics::GetOverlap(m_player, e);
+                if (overlap.x < 0 && overlap.y < 0)
+                {
+                    std::cout << "Collision error";
+                    return;
+                }
+                bool isVertical = overlap.y <= overlap.x;
+                if (isVertical)
+                {
+                    //check that the players velocity is going down
+                    if (m_player->getComponent<CTransform>().velocity.y > 1)
+                    {
+                        m_entityManager.deleteEntity(e);
+                    }
+                    else
+                    {
+                        sDamage(1);
+                    }
+                }
+                else
+                {
+                    sDamage(1);
+                }
             }
         }
 
@@ -786,6 +807,11 @@ void Scene_Play::drawDebug()
 
     ImGui::Begin("Player Debug");
     ImGui::Text(PositionString.c_str());
+
+    std::string VelocityString = "Player velocity -  x: " + std::to_string(transform.velocity.x) + " y: " + std::to_string(transform.velocity.y);
+    ImGui::Text(VelocityString.c_str());
+
+
 
     std::string isJumping = (state.isJumping ? "true" : "false");
     std::string JumpingString = "Is Jumping: " + isJumping;
