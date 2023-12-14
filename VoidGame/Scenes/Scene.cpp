@@ -7,6 +7,10 @@ void Scene::setPaused(bool paused)
 
 Scene::Scene(GameEngine* gameEngine) : m_game(gameEngine), m_currentFrame(0) {}
 
+void Scene::init()
+{
+}
+
 
 void Scene::sDoAction(const Action& action)
 {

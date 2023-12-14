@@ -29,6 +29,7 @@ public:
 	Scene();
 	Scene(GameEngine* gameEngine);
 
+	void init();
 	virtual void update() = 0;
 	virtual void sDoAction(const Action& action);
 	void simulate(const size_t frames);

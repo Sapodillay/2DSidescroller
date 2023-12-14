@@ -87,6 +87,7 @@ void GameEngine::changeScene(const std::string& sceneName, std::shared_ptr<Scene
 		}
 	}
 	m_currentScene = sceneName;
+	currentScene()->init();
 }
 
 void GameEngine::changeScene(const std::string& sceneName)
@@ -99,6 +100,7 @@ void GameEngine::changeScene(const std::string& sceneName)
 		return;
 	}
 	m_currentScene = sceneName;
+	currentScene()->init();
 }
 
 
