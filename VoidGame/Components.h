@@ -109,6 +109,10 @@ class CHealth : public Component
 public:
 	int m_health = 0;
 	int m_maxHealth = 0;
+	//the amount of time between attacks
+	int m_damageCooldownTime = 30.0f;
+	//int tracking current cooldown amount
+	int m_damageCooldown = 0.0f;
 	std::string m_healthString;
 
 	CHealth() {}
@@ -166,7 +170,6 @@ public:
 	CPathMovement(Vec2 point1, Vec2 point2, float moveSpeed) : p1(point1), p2(point2), speed(moveSpeed)
 	{
 	}
-
 };
 
 class CGravity : public Component
