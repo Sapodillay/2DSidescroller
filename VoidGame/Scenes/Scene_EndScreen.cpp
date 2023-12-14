@@ -1,6 +1,7 @@
 #include "Scene_EndScreen.h"
 
 #include "Scene_LevelEditor.h"
+#include "Scene_MainMenu.h"
 #include "Scene_Play.h"
 
 Scene_EndScreen::Scene_EndScreen(GameEngine* gameEngine, std::string displayString)
@@ -125,7 +126,7 @@ void Scene_EndScreen::sDoAction(const Action& action)
 
 
 			//TODO: Change to restart or go next level.
-			m_game->changeScene("MENU");
+			m_game->changeScene("MENU", std::make_shared<Scene_MainMenu>(m_game));
 		}
 	}
 }

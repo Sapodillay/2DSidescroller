@@ -12,6 +12,10 @@ Scene_MainMenu::Scene_MainMenu(GameEngine* gameEngine)
 
 void Scene_MainMenu::init()
 {
+	//set view in middle
+	sf::View view(m_game->window().getDefaultView());
+	view.setCenter(m_game->window().getDefaultView().getCenter());
+	m_game->window().setView(view);
 
 	registerAction(sf::Keyboard::W, "UP");
 	registerAction(sf::Keyboard::Up, "UP");
@@ -129,7 +133,9 @@ void Scene_MainMenu::sRender()
 
 			sf::FloatRect textBounds = m_text.getLocalBounds();
 			m_text.setOrigin(textBounds.left + textBounds.width / 2, textBounds.top + textBounds.height / 2);
-			m_text.setPosition(m_game->window().getSize().x / 2.0f, m_game->window().getSize().y / 2.0f + (i * 40));
+			m_text.setPosition(m_game->window().getView().getCenter().x, m_game->window().getView().getCenter().y);
+
+			m_text.setPosition(m_game->window().getView().getCenter().x, m_game->window().getView().getCenter().y + (i * 40));
 			m_game->window().draw(m_text);
 		}
 		m_game->window().display();
