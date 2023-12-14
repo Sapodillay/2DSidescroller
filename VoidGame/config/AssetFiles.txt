@@ -8,6 +8,9 @@ Animation grass_top_left Assets/grass_top_left.png 1 0
 
 Animation door Assets/door.png 1 0
 
+Animation heart_empty Assets/heart_empty.png 1 0
+Animation heart_full Assets/heart_full.png 1 0
+
 
 Animation Standing Assets/idle_animation.png 6 30
 Animation Running Assets/running_animation.png 8 30
