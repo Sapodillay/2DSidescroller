@@ -202,6 +202,7 @@ void Scene_Play::spawnEnemy()
     enemy->addComponent<CAnimation>(m_game->getAssets().getAnimation("slime_animate"), true);
     enemy->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
     enemy->addComponent<CTransform>(gridToMidPixel({5, 10}, enemy));
+    enemy->addComponent<CBoundingBox>(enemy->getComponent<CAnimation>().m_animation.getSize());
 
     enemy->addComponent<CPathMovement>(gridToMidPixel({ 5, 10 }, enemy), gridToMidPixel({ 18, 10 }, enemy), 0.2);
 }
@@ -219,6 +220,35 @@ void Scene_Play::update()
 
 void Scene_Play::sScore()
 {
+}
+
+void Scene_Play::sDamage(int damage)
+{
+    //damage player if damageable
+    if (!m_player->hasComponent<CHealth>())
+    {
+        std::cout << "Error: Player does not have health component" << std::endl;
+        return;
+    }
+
+
+
+
+    CHealth& health = m_player->getComponent<CHealth>();
+
+    //player can be damaged
+    if (health.m_damageCooldown == 0.0f)
+    {
+        //damage player
+        health.m_damageCooldown = health.m_damageCooldownTime;
+        health.m_health -= 1;
+        health.UpdateString();
+    }
+
+    if (health.m_health == 0)
+    {
+        m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You died!"));
+    }
 }
 
 void Scene_Play::sMovement()
@@ -405,7 +435,14 @@ void Scene_Play::sCollision()
                 m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: 3/3"));
             }
         }
-
+        else if (e->tag() == "Enemy")
+        {
+            if (Physics::AABB(m_player, e))
+            {
+                std::cout << "damaging player" << std::endl;
+                sDamage(1);
+            }
+        }
 
     }
 
@@ -540,6 +577,9 @@ void Scene_Play::sPlayerState()
 
     auto& transform = m_player->getComponent<CTransform>();
     auto& state = m_player->getComponent<CPlayerState>();
+
+    m_player->getComponent<CHealth>().m_damageCooldown = std::max(0, m_player->getComponent<CHealth>().m_damageCooldown - 1);
+
 
     //TODO: can be optimised.
     if (transform.velocity.x > 0)
@@ -747,6 +787,9 @@ void Scene_Play::drawDebug()
 
     std::string FrameCount = "Current Frame: " + std::to_string(int(m_player->getComponent<CAnimation>().m_animation.getFrameCount()));
     ImGui::Text(FrameCount.c_str());
+
+    std::string HealthString = "Health: " + std::to_string(int(m_player->getComponent<CHealth>().m_health));
+    ImGui::Text(HealthString.c_str());
 
 
     ImGui::End();

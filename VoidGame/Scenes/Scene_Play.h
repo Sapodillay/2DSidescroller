@@ -42,6 +42,7 @@ private:
 	void spawnEnemy();
 	void update();
 	void sScore();
+	void sDamage(int damage);
 	void sMovement();
 	void sPathMovement();
 	void sLifespan();
