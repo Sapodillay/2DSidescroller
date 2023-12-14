@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SFML/Audio.hpp>
 #include <string>
 #include "Scene.h"
 #include "../Vec2.h"
@@ -20,7 +21,8 @@ protected:
 	sf::Font m_font;
 	sf::Text m_text;
 
-
+	sf::SoundBuffer m_hurtSoundBuffer;
+	sf::Sound m_hurtSound;
 
 	Vec2 m_gridSize = { 32.0f, 32.0f };
 	std::shared_ptr<Entity> m_player;

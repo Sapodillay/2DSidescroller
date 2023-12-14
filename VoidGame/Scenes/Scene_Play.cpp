@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -59,6 +60,17 @@ void Scene_Play::init(std::string& levelPath)
     m_text.setFillColor(sf::Color::White);
     m_text.setOutlineThickness(2.0f);
     m_text.setOutlineColor(sf::Color::Black);
+
+    if (!m_hurtSoundBuffer.loadFromFile("Assets/hurt.ogg")) {
+        std::cout << "Could not load hurt sound. Assets/hurt.ogg" << std::endl;
+    }
+    else
+    {
+        m_hurtSound.setBuffer(m_hurtSoundBuffer);
+        m_hurtSound.setVolume(30);
+    }
+
+
 
     spawnPlayer();
     spawnEnemy();
@@ -231,9 +243,6 @@ void Scene_Play::sDamage(int damage)
         return;
     }
 
-
-
-
     CHealth& health = m_player->getComponent<CHealth>();
 
     //player can be damaged
@@ -241,8 +250,14 @@ void Scene_Play::sDamage(int damage)
     {
         //damage player
         health.m_damageCooldown = health.m_damageCooldownTime;
-        health.m_health -= 1;
+        health.m_health -= damage;
         health.UpdateString();
+        //if sound has soundbuffer loaded, play the sound.
+        if (m_hurtSound.getBuffer())
+        {
+            m_hurtSound.play();
+        }
+
     }
 
     if (health.m_health == 0)
@@ -432,6 +447,7 @@ void Scene_Play::sCollision()
             if (Physics::AABB(m_player, e))
             {
                 //if player reaches door finish the level and display the score.
+                //TODO: Score system.
                 m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: 3/3"));
             }
         }
@@ -439,7 +455,6 @@ void Scene_Play::sCollision()
         {
             if (Physics::AABB(m_player, e))
             {
-                std::cout << "damaging player" << std::endl;
                 sDamage(1);
             }
         }
