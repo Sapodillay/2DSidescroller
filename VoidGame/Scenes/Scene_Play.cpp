@@ -196,7 +196,7 @@ void Scene_Play::spawnPlayer()
 {
 
     m_player = m_entityManager.addEntity("player");
-    m_player->addComponent<CHealth>(10);
+    m_player->addComponent<CHealth>(3);
     m_player->addComponent<CTransform>(gridToMidPixel({ 0, 0 }, m_player));
     CAnimation& animation = m_player->addComponent<CAnimation>(m_game->getAssets().getAnimation("Standing"), true);
     m_player->addComponent<CInput>();
@@ -484,6 +484,7 @@ void Scene_Play::sCollision()
                     if (m_player->getComponent<CTransform>().velocity.y > 1)
                     {
                         m_entityManager.deleteEntity(e);
+                        m_player->getComponent<CTransform>().velocity.y = -15;
                     }
                     else
                     {
@@ -530,6 +531,11 @@ void Scene_Play::sDoAction(const Action& action)
         else if (name == "TOGGLE_COLLISION") { m_drawCollision = !m_drawCollision; }
         else if (name == "RESET") 
         { 
+
+            int enemyAmount = m_entityManager.getEntities("Enemy").size();
+
+            std::cout << "Enemy amount: " << enemyAmount << std::endl;
+
         }
     }
     else if (action.getType() == "END")
@@ -797,13 +803,12 @@ void Scene_Play::sRender()
             sf::Vector2f heartStartPos = m_game->window().getView().getCenter();
             heartStartPos.x = heartStartPos.x - m_game->window().getView().getSize().x / 2;
             heartStartPos.y = heartStartPos.y - m_game->window().getView().getSize().y / 2;
+            //Padding
             heartStartPos.y += 64;
-            heartStartPos.x += 32;
+            heartStartPos.x += 64;
             
             auto fullHeart = m_entityManager.getEntities("UI_FullHeart").at(0);
             auto emptyHeart = m_entityManager.getEntities("UI_EmptyHeart").at(0);
-
-            std::cout << "Starting drawing hearts" << std::endl;
 
             //draw full hearts.
             for (int i = 0; i < m_player->getComponent<CHealth>().m_health; i++)
@@ -817,7 +822,6 @@ void Scene_Play::sRender()
 
                 anim.m_animation.getSprite().setPosition(trans.pos.x, trans.pos.y);
                 m_game->window().draw(anim.m_animation.getSprite());
-                std::cout << "Drawing full heart i: " << i << std::endl;
 
             }
             if (m_player->getComponent<CHealth>().m_health != m_player->getComponent<CHealth>().m_maxHealth)
@@ -833,10 +837,9 @@ void Scene_Play::sRender()
 
                     anim.m_animation.getSprite().setPosition(trans.pos.x, trans.pos.y);
                     m_game->window().draw(anim.m_animation.getSprite());
-                    std::cout << "Drawing empty heart i: " << i << std::endl;
                 }
             }
-            std::cout << "Finished drawing hearts" << std::endl;
+
         }
     }
 
