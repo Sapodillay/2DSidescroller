@@ -22,6 +22,9 @@ protected:
 	bool m_drawGrid = false;
 	bool m_drawUI = true;
 
+	Vec2 m_path1;
+	Vec2 m_path2;
+
 	std::string m_currentTool;
 	Animation m_selectedAnimation;
 	bool m_solidPlace = true;
@@ -39,6 +42,7 @@ private:
 	void paletteRender();
 	void saveLevel(std::string fileName);
 	void Place(Vec2 GridPos, Animation animation);
+	void PlaceEnemy(Vec2 GridPos, Vec2 StartPos, Vec2 EndPos, Animation animation);
 
 
 
@@ -47,6 +51,8 @@ private:
 	Vec2 pixelToGrid(Vec2 pixelPos);
 	Vec2 localPixelToGrid(Vec2 pixelPos);
 	void drawLine(const Vec2& p1, const Vec2& p2);
+	void drawLine(const Vec2& p1, const Vec2& p2, sf::Color color1, sf::Color color2);
+
 
 };
 

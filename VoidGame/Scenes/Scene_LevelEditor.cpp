@@ -153,6 +153,12 @@ void Scene_LevelEditor::sDoAction(const Action& action)
                 Vec2 GridPos = localPixelToGrid(GetMousePosition());
                 Place(GridPos, m_selectedAnimation);
             }
+            else if (m_currentTool == "PLACE_ENEMY")
+            {
+                Vec2 GridPos = localPixelToGrid(GetMousePosition());
+
+
+            }
             else if (m_currentTool == "ERASE")
             {
                 Vec2 GridPos = localPixelToGrid(GetMousePosition());
@@ -280,6 +286,11 @@ void Scene_LevelEditor::sRender()
             xTile++;
         }
 
+        if (m_currentTool == "PLACE_ENEMY")
+        {
+            drawLine(gridToPixel(m_path1) + Vec2(0.5f * m_gridSize.x, 0.5f * m_gridSize.y), gridToPixel(m_path2) + Vec2(0.5f * m_gridSize.x, 0.5f * m_gridSize.y), sf::Color::Red, sf::Color::Blue);
+        }
+
     }
 
     if (m_drawCollision)
@@ -330,6 +341,12 @@ void Scene_LevelEditor::drawLine(const Vec2& p1, const Vec2& p2)
     m_game->window().draw(line, 2, sf::Lines);
 }
 
+void Scene_LevelEditor::drawLine(const Vec2& p1, const Vec2& p2, sf::Color color1, sf::Color color2)
+{
+    sf::Vertex line[] = { sf::Vertex(sf::Vector2f(p1.x, p1.y), sf::Color::Red), sf::Vertex(sf::Vector2f(p2.x, p2.y),sf::Color::Blue) };
+    m_game->window().draw(line, 2, sf::Lines);
+}
+
 //convert screen pixels to grid position
 Vec2 Scene_LevelEditor::localPixelToGrid(Vec2 pixelPos)
 {
@@ -349,12 +366,16 @@ void Scene_LevelEditor::onEnd()
 char loadInputBuffer[256] = "";
 char saveInputBuffer[256] = "";
 
+static int path1[2] = { -999, -999 };
+static int path2[2] = { -999, -999 };
+
+
 void Scene_LevelEditor::paletteRender()
 {
     ImGui::Begin("Palette");
 
     ImGui::Text("Select Tool: ");
-    const char* items[] = { "Place", "Erase" };
+    const char* items[] = { "Place", "Erase", "Place enemy"};
     static int tool_current = 0;
     if (ImGui::BeginCombo("##Tool", items[tool_current])) {
         for (int i = 0; i < sizeof(items) / sizeof(items[0]); i++) {
@@ -368,6 +389,10 @@ void Scene_LevelEditor::paletteRender()
                 else if (items[i] == "Erase")
                 {
                     m_currentTool = "ERASE";
+                }
+                else if (items[i] == "Place enemy")
+                {
+                    m_currentTool = "PLACE_ENEMY";
                 }
             }
             if (is_selected) {
@@ -427,6 +452,22 @@ void Scene_LevelEditor::paletteRender()
         // Call the function with the text from the input field when the button is clicked
         std::string filename = saveInputBuffer;
         saveLevel(filename);
+    }
+
+    //render path editor
+    if (m_currentTool == "PLACE_ENEMY")
+    {
+        ImGui::Text("Path Start Vec: ");
+        ImGui::InputInt2("##Path1", path1);
+
+        ImGui::Text("Path End Vec: ");
+        ImGui::InputInt2("##Path2", path2);
+
+        m_path1.x = path1[0];
+        m_path1.y = path1[1];
+
+        m_path2.x = path2[0];
+        m_path2.y = path2[1];
     }
 
 
@@ -492,6 +533,10 @@ void Scene_LevelEditor::Place(Vec2 GridPos, Animation animation)
     {
         tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
     }
+}
+
+void Scene_LevelEditor::PlaceEnemy(Vec2 GridPos, Vec2 StartPos, Vec2 EndPos, Animation animation)
+{
 }
 
 Vec2 Scene_LevelEditor::gridToPixel(Vec2 gridPos)
