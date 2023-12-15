@@ -464,7 +464,34 @@ void Scene_Play::sCollision()
             {
                 //if player reaches door finish the level and display the score.
                 //TODO: Score system.
-                m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: 3/3"));
+                
+                //check that player has killed all enemies
+                if (m_entityManager.getEntities("Enemy").size() == 0)
+                {
+                    m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: 3/3"));
+                }
+                else
+                {
+                    //check that its a new collision
+                   if (!Physics::AABB_PreviousPosition(m_player, e))
+                   {
+                       //prompt.
+                       Prompt prompt;
+
+                       std::stringstream sstream;
+                       sstream << "There is " << m_entityManager.getEntities("Enemy").size() << " enemies left";
+
+                       Vec2 offset(100, 0);
+
+                       prompt.name = sstream.str();
+                       prompt.timeLength = 120.0f;
+                       prompt.location = m_player->getComponent<CTransform>().pos - offset;
+                       promptVec.push_back(prompt);
+                   }
+
+                }
+
+
             }
         }
         else if (e->tag() == "Enemy")
@@ -850,7 +877,8 @@ void Scene_Play::sRender()
 
         if (promptVec.size() > 0)
         {
-            std::cout << "size: " << promptVec.size();
+
+            //remove dead prompts
             promptVec.erase(
                 std::remove_if(promptVec.begin(), promptVec.end(), [](const Prompt& prompt) {
                     return prompt.timeLength <= 0.0f;
