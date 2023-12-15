@@ -534,7 +534,13 @@ void Scene_Play::sDoAction(const Action& action)
 
             int enemyAmount = m_entityManager.getEntities("Enemy").size();
 
-            std::cout << "Enemy amount: " << enemyAmount << std::endl;
+            Prompt testPrompt;
+            testPrompt.name = "There are x amount of enemies left";
+            testPrompt.timeLength = 120.0f;
+            testPrompt.location = m_player->getComponent<CTransform>().pos;
+
+            promptVec.push_back(testPrompt);
+
 
         }
     }
@@ -837,6 +843,42 @@ void Scene_Play::sRender()
 
                     anim.m_animation.getSprite().setPosition(trans.pos.x, trans.pos.y);
                     m_game->window().draw(anim.m_animation.getSprite());
+                }
+            }
+
+        }
+
+        if (promptVec.size() > 0)
+        {
+            std::cout << "size: " << promptVec.size();
+            promptVec.erase(
+                std::remove_if(promptVec.begin(), promptVec.end(), [](const Prompt& prompt) {
+                    return prompt.timeLength <= 0.0f;
+                    }),
+                promptVec.end()
+            );
+            for (auto& prompt : promptVec)
+            {
+                if (prompt.timeLength > 0)
+                {
+                    prompt.timeLength = prompt.timeLength - 1.0f;
+
+                    //inverse lerp to calculate opacity based on prompt time.
+                    float opacity = (prompt.timeLength - 0) / (120.0f - 0.0f);
+
+                    sf::Color color = m_text.getFillColor();
+                    sf::Color outlineColor = m_text.getOutlineColor();
+                    outlineColor.a = opacity * 255;
+                    color.a = opacity * 255;
+                    m_text.setFillColor(color);
+                    m_text.setOutlineColor(outlineColor);
+
+                    //make prompts float upwards
+                    prompt.location.y -= 1.0f;
+
+                    m_text.setPosition(prompt.location.x, prompt.location.y);
+                    m_text.setString(prompt.name);
+                    m_game->window().draw(m_text);
                 }
             }
 
