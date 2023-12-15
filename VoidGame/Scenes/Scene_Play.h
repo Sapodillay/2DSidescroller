@@ -21,6 +21,15 @@ protected:
 	sf::Font m_font;
 	sf::Text m_text;
 
+	struct Prompt
+	{
+		std::string name;
+		int timeLength;
+		Vec2 location;
+	};
+
+	std::vector<Prompt> promptVec;
+
 	sf::SoundBuffer m_hurtSoundBuffer;
 	sf::Sound m_hurtSound;
 

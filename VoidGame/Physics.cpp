@@ -40,3 +40,18 @@ bool Physics::AABB(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b)
 		aPos.y < bPos.y + bSize.y &&
 		aPos.y + aSize.y > bPos.y);
 }
+
+bool Physics::AABB_PreviousPosition(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b)
+{
+	Vec2 aPos = a->getComponent<CTransform>().prev_pos;
+	Vec2 bPos = b->getComponent<CTransform>().prev_pos;
+
+	Vec2 aSize = a->getComponent<CBoundingBox>().size;
+	Vec2 bSize = b->getComponent<CBoundingBox>().size;
+
+	return (
+		aPos.x < bPos.x + bSize.x &&
+		aPos.x + aSize.x > bPos.x &&
+		aPos.y < bPos.y + bSize.y &&
+		aPos.y + aSize.y > bPos.y);
+}

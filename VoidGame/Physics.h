@@ -8,6 +8,9 @@ namespace Physics
 	Vec2 GetPreviousOverlap(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b);
 
 	bool AABB(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b);
+	bool AABB_PreviousPosition(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b);
+
+
 
 }
 
