@@ -84,10 +84,13 @@ void Scene_LevelEditor::loadLevel(std::string& filename)
         int y;
         std::string isBoundingBox;
 
-        iss >> type >> animationName >> x >> y >> isBoundingBox;
+        iss >> type;
 
         if (type == "Tile")
         {
+            iss >> animationName >> x >> y >> isBoundingBox;
+
+
             Vec2 GridPos(x, y);
             Animation animation = m_game->getAssets().getAnimation(animationName);
             auto tile = m_entityManager.addEntity("Tile");
@@ -106,6 +109,7 @@ void Scene_LevelEditor::loadLevel(std::string& filename)
             //
             //TODO: Bug loading enemy in LevelEditor from save file.
             std::cout << "Enemy loading... name:" << animationName << std::endl;
+            iss >> animationName >> x >> y >> isBoundingBox;
 
             float p1_x;
             float p1_y;
@@ -131,6 +135,23 @@ void Scene_LevelEditor::loadLevel(std::string& filename)
                 enemy->addComponent<CBoundingBox>(enemy->getComponent<CAnimation>().m_animation.getSize());
             }
         }
+        else if (type == "PlayerStart")
+        {
+            int x;
+            int y;
+            iss >> x >> y;
+
+
+
+            std::cout << "Setting player start" << std::endl; 
+            std::cout << "X: " << x << std::endl;
+            std::cout << "Y: " << y << std::endl;
+
+
+            m_playerStart.x = x;
+            m_playerStart.y = y;
+        }
+
     }
 
 }
@@ -399,6 +420,8 @@ char saveInputBuffer[256] = "";
 static int path1[2] = { -999, -999 };
 static int path2[2] = { -999, -999 };
 
+static int playerStart[2] = { -999, -999 };
+
 
 void Scene_LevelEditor::paletteRender()
 {
@@ -501,10 +524,26 @@ void Scene_LevelEditor::paletteRender()
     }
 
 
+    ImGui::Text("Player Start Position: ");
+    ImGui::InputInt2("##PlayerStart", playerStart);
 
 
 
-    // No need to delete[] animation_names, as they are pointers to existing strings
+    if (playerStart[0] == -999 && playerStart[1] == -999)
+    {
+        if (m_playerStart.x != -999 && m_playerStart.y != -999)
+        {
+            //set to loaded player start.
+            playerStart[0] = m_playerStart.x;
+            playerStart[1] = m_playerStart.y;
+
+        }
+    }
+
+
+    m_playerStart.x = playerStart[0];
+    m_playerStart.y = playerStart[1];
+
     ImGui::End();
 }
 
@@ -516,6 +555,23 @@ void Scene_LevelEditor::saveLevel(std::string fileName)
     std::cout << "Saving level.." << std::endl;
 
     std::ofstream outfile("levels/" + fileName + ".txt");
+
+
+    //if the player start isn't defined, throw error.
+    if ((m_playerStart.x == -999) || (m_playerStart.y == -999))
+    {
+        std::cout << "Error saving level. Player start is undefined." << std::endl;
+        std::cout << "X: " << m_playerStart.x << std::endl;
+        std::cout << "Y: " << m_playerStart.y << std::endl;
+        return;
+    }
+    
+    std::string startData;
+    startData.append("PlayerStart ");
+    startData.append(std::to_string(int(m_playerStart.x)) + " ");
+    startData.append(std::to_string(int(m_playerStart.y)) + " ");
+    outfile << startData << std::endl;
+
 
 
     for (auto& e : m_entityManager.getEntities())

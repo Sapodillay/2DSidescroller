@@ -70,12 +70,10 @@ void Scene_Play::init(std::string& levelPath)
         m_hurtSound.setVolume(30);
     }
 
-    spawnPlayer();
 
     std::string defaultLevel = "Level1";
     loadLevel(defaultLevel);
-
-
+    spawnPlayer();
 }
 
 void Scene_Play::loadLevel(std::string& filename)
@@ -163,14 +161,16 @@ void Scene_Play::loadLevel(std::string& filename)
         int y;
         std::string isBoundingBox;
 
-        iss >> type >> animationName >> x >> y >> isBoundingBox;
-        Vec2 GridPos(x, y);
-        Animation animation = m_game->getAssets().getAnimation(animationName);
+        iss >> type;
 
 
         if (type == "Tile")
         {
             std::string tileTag = "Tile";
+
+            iss >> animationName >> x >> y >> isBoundingBox;
+            Vec2 GridPos(x, y);
+            Animation animation = m_game->getAssets().getAnimation(animationName);
 
             if (animationName == "door")
             {
@@ -189,6 +189,10 @@ void Scene_Play::loadLevel(std::string& filename)
         }
         else if (type == "Enemy")
         {
+
+            iss >> animationName >> x >> y >> isBoundingBox;
+            Vec2 GridPos(x, y);
+            Animation animation = m_game->getAssets().getAnimation(animationName);
 
             float p1_x;
             float p1_y;
@@ -216,6 +220,16 @@ void Scene_Play::loadLevel(std::string& filename)
 
 
         }
+        else if (type == "PlayerStart")
+        {
+            int x;
+            int y;
+
+            iss >> x >> y;
+
+            m_playerStart.x = x;
+            m_playerStart.y = y;
+        }
     }
 }
 
@@ -237,7 +251,18 @@ void Scene_Play::spawnPlayer()
     m_player->addComponent<CBoundingBox>(animation.m_animation.getSize());
 
     //align to grid
-    m_player->getComponent<CTransform>().pos = gridToMidPixel(Vec2(3, 3), m_player);
+    if (m_playerStart.x == -999)
+    {
+        std::cout << "Failed to load player start. loading default start" << std::endl;
+        m_player->getComponent<CTransform>().pos = gridToMidPixel(Vec2(3, 3), m_player);
+
+    }
+    else
+    {
+        m_player->getComponent<CTransform>().pos = gridToMidPixel(Vec2(m_playerStart.x, m_playerStart.y), m_player);
+
+    }
+
 
 
     //Add playerstate
@@ -318,8 +343,8 @@ void Scene_Play::sMovement()
 
     if (m_player->getComponent<CInput>().up && playerState.jumpTimer < 2.0f && playerState.state != "Down")
     {
-        playerTransform.velocity.y = -12;
-        playerState.jumpTimer += 0.2f;
+        playerTransform.velocity.y = -20;
+        playerState.jumpTimer += 2.0f;
     }
 
 

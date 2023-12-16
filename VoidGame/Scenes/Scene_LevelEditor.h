@@ -25,6 +25,8 @@ protected:
 	Vec2 m_path1;
 	Vec2 m_path2;
 
+	Vec2 m_playerStart = { -999, -999 };
+
 	std::string m_currentTool;
 	Animation m_selectedAnimation;
 	bool m_solidPlace = true;

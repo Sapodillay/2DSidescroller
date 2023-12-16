@@ -30,6 +30,8 @@ protected:
 
 	std::vector<Prompt> promptVec;
 
+	Vec2 m_playerStart = {-999, -999};
+
 	sf::SoundBuffer m_hurtSoundBuffer;
 	sf::Sound m_hurtSound;
 
