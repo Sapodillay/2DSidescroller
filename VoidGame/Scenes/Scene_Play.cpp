@@ -48,14 +48,16 @@ void Scene_Play::init(std::string& levelPath)
     m_gridSize.x = m_game->window().getSize().x / 20.0f;
     m_gridSize.y = m_game->window().getSize().y / 12.0f;
 
-    if (!m_font.loadFromFile("Assets/arial.ttf"))
+    if (!m_font.loadFromFile("Assets/comic.ttf"))
         std::cout << "Could not load font" << std::endl;
 
     m_text.setFont(m_font);
     m_text.setCharacterSize(12);
     m_text.setFillColor(sf::Color::White);
 
-    m_healthText.setFont(m_font);
+    m_scoreText.setFont(m_font);
+    m_scoreText.setOutlineColor(sf::Color::Black);
+    m_scoreText.setOutlineThickness(2.0f);
     m_text.setCharacterSize(16);
     m_text.setFillColor(sf::Color::White);
     m_text.setOutlineThickness(2.0f);
@@ -268,6 +270,8 @@ void Scene_Play::spawnPlayer()
     //Add playerstate
     m_player->addComponent<CPlayerState>();
     m_player->addComponent<CGravity>(1.0f);
+    //Starting score
+    m_player->addComponent<CScore>(100);
 
 }
 
@@ -284,11 +288,22 @@ void Scene_Play::update()
     sPathMovement();
     sCollision();
     sPlayerState();
+    sScore();
     sRender();
 }
 
+//score delta
+float scoreDelta = 0.0f;
+
 void Scene_Play::sScore()
 {
+    scoreDelta += m_game->deltaClock.getElapsedTime().asSeconds();
+    //Remove 1 from the score each second.
+    if (scoreDelta >= 1)
+    {
+        scoreDelta = 0.0f;
+        m_player->getComponent<CScore>().score = std::max(m_player->getComponent<CScore>().score - 1, 0);
+    }
 }
 
 void Scene_Play::sDamage(int damage)
@@ -503,12 +518,13 @@ void Scene_Play::sCollision()
             if (Physics::AABB(m_player, e))
             {
                 //if player reaches door finish the level and display the score.
-                //TODO: Score system.
                 
                 //check that player has killed all enemies
                 if (m_entityManager.getEntities("Enemy").size() == 0)
                 {
-                    m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: 3/3"));
+                    m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: " + std::to_string(int(m_player->getComponent<CScore>().score))));
+                    //TODO: Save the score.
+
                 }
                 else
                 {
@@ -745,7 +761,7 @@ void Scene_Play::sRender()
     view.setCenter(windowCenterX + 100, m_game->window().getSize().y - view.getCenter().y);
     m_game->window().setView(view);
 
-    drawDebug();
+    //drawDebug();
 
 
     for (auto& e : m_entityManager.getEntities())
@@ -869,6 +885,20 @@ void Scene_Play::sRender()
     //draw ui
     if (m_drawUI)
     {
+        //draw player score.
+        if (m_player->hasComponent<CScore>())
+        {
+            float score = m_player->getComponent<CScore>().score;
+            //set text to top right of screen.
+            sf::Vector2f textPosition = m_game->window().getView().getCenter();
+            textPosition.x = textPosition.x - m_game->window().getView().getSize().x / 2;
+            textPosition.y = textPosition.y - m_game->window().getView().getSize().y / 2;
+            textPosition.x += 50;
+            m_scoreText.setPosition(textPosition);
+            m_scoreText.setString("Score: " + std::to_string(int(score)));
+            m_game->window().draw(m_scoreText);
+        }
+
         //draw player health.
         if (m_player->hasComponent<CHealth>())
         {
