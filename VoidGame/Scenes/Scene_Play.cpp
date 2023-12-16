@@ -72,7 +72,7 @@ void Scene_Play::init(std::string& levelPath)
 
     spawnPlayer();
 
-    std::string defaultLevel = "default";
+    std::string defaultLevel = "Level1";
     loadLevel(defaultLevel);
 
 
