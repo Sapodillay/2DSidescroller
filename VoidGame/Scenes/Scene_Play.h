@@ -40,7 +40,7 @@ protected:
 	std::string m_levelPath;
 	PlayerConfig m_playerConfig;
 
-	sf::Text m_healthText;
+	sf::Text m_scoreText;
 
 	bool m_drawTextures = true;
 	bool m_drawCollision = false;
