@@ -59,10 +59,7 @@ void Scene_LevelEditor::loadLevel(std::string& filename)
     //Delete existing tiles
     for (auto& e : m_entityManager.getEntities())
     {
-        if (e->tag() == "Tile")
-        {
-            m_entityManager.deleteEntity(e);
-        }
+        m_entityManager.deleteEntity(e);
     }
 
 
@@ -81,27 +78,61 @@ void Scene_LevelEditor::loadLevel(std::string& filename)
     {
         std::istringstream iss(line);
 
+        std::string type;
         std::string animationName;
         int x;
         int y;
         std::string isBoundingBox;
 
-        iss >> animationName >> x >> y >> isBoundingBox;
+        iss >> type >> animationName >> x >> y >> isBoundingBox;
 
-
-        Vec2 GridPos(x, y);
-
-        Animation animation = m_game->getAssets().getAnimation(animationName);
-        auto tile = m_entityManager.addEntity("Tile");
-        tile->addComponent<CAnimation>(animation, true);
-        tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-        tile->addComponent<CTransform>(gridToMidPixel(GridPos, tile));
-
-        if (isBoundingBox == "true")
+        if (type == "Tile")
         {
-            tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
+            Vec2 GridPos(x, y);
+            Animation animation = m_game->getAssets().getAnimation(animationName);
+            auto tile = m_entityManager.addEntity("Tile");
+            tile->addComponent<CAnimation>(animation, true);
+            tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+            tile->addComponent<CTransform>(gridToMidPixel(GridPos, tile));
+
+            if (isBoundingBox == "true")
+            {
+                tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
+            }
+        }
+        else if (type == "Enemy")
+        {
+
+            //
+            //TODO: Bug loading enemy in LevelEditor from save file.
+            std::cout << "Enemy loading... name:" << animationName << std::endl;
+
+            float p1_x;
+            float p1_y;
+            float p2_x;
+            float p2_y;
+
+            Vec2 GridPos(x, y);
+            Animation animation = m_game->getAssets().getAnimation(animationName);
+
+            iss >> p1_x >> p1_y >> p2_x >> p2_y;
+
+            auto enemy = m_entityManager.addEntity("Enemy");
+            enemy->addComponent<CAnimation>(animation, true);
+            enemy->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+            enemy->addComponent<CTransform>(gridToMidPixel(GridPos, enemy));
+            enemy->addComponent<CPathMovement>(Vec2(p1_x, p1_y ), Vec2( p2_x, p2_y ), 0.2);
+
+            std::cout << p1_x << std::endl; 
+
+
+            if (isBoundingBox == "true")
+            {
+                enemy->addComponent<CBoundingBox>(enemy->getComponent<CAnimation>().m_animation.getSize());
+            }
         }
     }
+
 }
 
 
@@ -156,8 +187,7 @@ void Scene_LevelEditor::sDoAction(const Action& action)
             else if (m_currentTool == "PLACE_ENEMY")
             {
                 Vec2 GridPos = localPixelToGrid(GetMousePosition());
-
-
+                PlaceEnemy(GridPos, m_path1, m_path2, m_selectedAnimation);
             }
             else if (m_currentTool == "ERASE")
             {
@@ -490,12 +520,31 @@ void Scene_LevelEditor::saveLevel(std::string fileName)
 
     for (auto& e : m_entityManager.getEntities())
     {
-        if (e->hasComponent<CBoundingBox>())
+        if (e->tag() == "Enemy")
+        {
+            std::cout << "Saving enemy with texture: " << e->getComponent<CAnimation>().m_animation.getName() << std::endl;
+
+            Vec2 GridPos = pixelToGrid(e->getComponent<CTransform>().pos);
+
+            std::string entityData;
+            entityData.append("Enemy ");
+            entityData.append(e->getComponent<CAnimation>().m_animation.getName() + " ");
+            entityData.append(std::to_string(int(GridPos.x)) + " " + std::to_string(int(GridPos.y)) + " ");
+            entityData.append("true ");
+            entityData.append(std::to_string(int(e->getComponent<CPathMovement>().p1.x)) + " ");
+            entityData.append(std::to_string(int(e->getComponent<CPathMovement>().p1.y)) + " ");
+            entityData.append(std::to_string(int(e->getComponent<CPathMovement>().p2.x)) + " ");
+            entityData.append(std::to_string(int(e->getComponent<CPathMovement>().p2.y)) + " ");
+
+            outfile << entityData << std::endl;
+        }
+        else if (e->hasComponent<CBoundingBox>())
         {
 
             Vec2 GridPos = pixelToGrid(e->getComponent<CTransform>().pos);
 
             std::string entityData;
+            entityData.append("Tile ");
             entityData.append(e->getComponent<CAnimation>().m_animation.getName() + " ");
             entityData.append(std::to_string(int(GridPos.x)) + " " + std::to_string(int(GridPos.y)) + " ");
             entityData.append("true ");
@@ -507,6 +556,7 @@ void Scene_LevelEditor::saveLevel(std::string fileName)
             Vec2 GridPos = pixelToGrid(e->getComponent<CTransform>().pos);
 
             std::string entityData;
+            entityData.append("Tile ");
             entityData.append(e->getComponent<CAnimation>().m_animation.getName() + " ");
             entityData.append(std::to_string(int(GridPos.x)) + " " + std::to_string(int(GridPos.y)) + " ");
             entityData.append("false ");
@@ -537,6 +587,11 @@ void Scene_LevelEditor::Place(Vec2 GridPos, Animation animation)
 
 void Scene_LevelEditor::PlaceEnemy(Vec2 GridPos, Vec2 StartPos, Vec2 EndPos, Animation animation)
 {
+    auto enemy = m_entityManager.addEntity("Enemy");
+    enemy->addComponent<CAnimation>(animation, true);
+    enemy->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+    enemy->addComponent<CTransform>(gridToMidPixel(GridPos, enemy));
+    enemy->addComponent<CPathMovement>(StartPos, EndPos, 0.0f);
 }
 
 Vec2 Scene_LevelEditor::gridToPixel(Vec2 gridPos)

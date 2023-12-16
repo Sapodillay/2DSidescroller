@@ -70,10 +70,7 @@ void Scene_Play::init(std::string& levelPath)
         m_hurtSound.setVolume(30);
     }
 
-
-
     spawnPlayer();
-    spawnEnemy();
 
     std::string defaultLevel = "default";
     loadLevel(defaultLevel);
@@ -160,33 +157,64 @@ void Scene_Play::loadLevel(std::string& filename)
     {
         std::istringstream iss(line);
 
+        std::string type;
         std::string animationName;
         int x;
         int y;
         std::string isBoundingBox;
 
-        iss >> animationName >> x >> y >> isBoundingBox;
-
-
+        iss >> type >> animationName >> x >> y >> isBoundingBox;
         Vec2 GridPos(x, y);
-
         Animation animation = m_game->getAssets().getAnimation(animationName);
 
-        std::string tileTag = "Tile";
 
-        if (animationName == "door")
+        if (type == "Tile")
         {
-            tileTag = "Door";
+            std::string tileTag = "Tile";
+
+            if (animationName == "door")
+            {
+                tileTag = "Door";
+            }
+
+            auto tile = m_entityManager.addEntity(tileTag);
+            tile->addComponent<CAnimation>(animation, true);
+            tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+            tile->addComponent<CTransform>(gridToMidPixel(GridPos, tile));
+
+            if (isBoundingBox == "true")
+            {
+                tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
+            }
         }
-
-        auto tile = m_entityManager.addEntity(tileTag);
-        tile->addComponent<CAnimation>(animation, true);
-        tile->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-        tile->addComponent<CTransform>(gridToMidPixel(GridPos, tile));
-
-        if (isBoundingBox == "true")
+        else if (type == "Enemy")
         {
-            tile->addComponent<CBoundingBox>(tile->getComponent<CAnimation>().m_animation.getSize());
+
+            float p1_x;
+            float p1_y;
+            float p2_x;
+            float p2_y;
+
+            iss >> p1_x >> p1_y >> p2_x >> p2_y;
+
+            auto enemy = m_entityManager.addEntity("Enemy");
+            enemy->addComponent<CAnimation>(animation, true);
+            enemy->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
+            enemy->addComponent<CTransform>(gridToMidPixel(GridPos, enemy));
+            enemy->addComponent<CPathMovement>(gridToMidPixel({ p1_x, p1_y }, enemy), gridToMidPixel({ p2_x, p2_y }, enemy), 0.2);
+
+
+            std::cout << "Loading enemy: path 1: x" << p1_x << " y: " << p1_y << std::endl;
+            std::cout << "Loading enemy: path 2: x" << p2_x << " y: " << p2_y << std::endl;
+
+
+            if (isBoundingBox == "true")
+            {
+                enemy->addComponent<CBoundingBox>(enemy->getComponent<CAnimation>().m_animation.getSize());
+            }
+
+
+
         }
     }
 }
@@ -222,19 +250,6 @@ void Scene_Play::spawnBullet(std::shared_ptr<Entity> entity)
 {
 }
 
-//spawn test enemy
-void Scene_Play::spawnEnemy()
-{
-    auto enemy = m_entityManager.addEntity("Enemy");
-
-    enemy->addComponent<CHealth>(3);
-    enemy->addComponent<CAnimation>(m_game->getAssets().getAnimation("slime_animate"), true);
-    enemy->getComponent<CAnimation>().m_animation.setSize(m_gridSize);
-    enemy->addComponent<CTransform>(gridToMidPixel({5, 10}, enemy));
-    enemy->addComponent<CBoundingBox>(enemy->getComponent<CAnimation>().m_animation.getSize());
-
-    enemy->addComponent<CPathMovement>(gridToMidPixel({ 5, 10 }, enemy), gridToMidPixel({ 18, 10 }, enemy), 0.2);
-}
 
 void Scene_Play::update()
 {

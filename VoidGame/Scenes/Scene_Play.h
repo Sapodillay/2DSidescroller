@@ -50,7 +50,6 @@ private:
 	void loadLevel(std::string& filename);
 	void spawnPlayer();
 	void spawnBullet(std::shared_ptr<Entity> entity);
-	void spawnEnemy();
 	void update();
 	void sScore();
 	void sDamage(int damage);
