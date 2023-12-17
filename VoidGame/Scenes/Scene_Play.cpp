@@ -72,9 +72,7 @@ void Scene_Play::init(std::string& levelPath)
         m_hurtSound.setVolume(30);
     }
 
-
-    std::string defaultLevel = "Level1";
-    loadLevel(defaultLevel);
+    loadLevel(m_levelPath);
     spawnPlayer();
 }
 
