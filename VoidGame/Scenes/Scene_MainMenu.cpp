@@ -30,6 +30,17 @@ void Scene_MainMenu::init()
 	m_menuStrings.push_back("Exit");
 
 
+
+
+	//Hard coded level names, C++ 14 doesn't support filesystem.
+	m_levelStrings.push_back("Level 1");
+	m_levelStrings.push_back("Level 2");
+	m_levelStrings.push_back("Level 3");
+	m_levelStrings.push_back("Level 4");
+	m_levelStrings.push_back("Back");
+
+
+
 	//temp font, change later
 	if (!m_menuFont.loadFromFile("Assets/comic.ttf"))
 		std::cout << "Could not load font" << std::endl;
@@ -86,6 +97,7 @@ void Scene_MainMenu::init()
 void Scene_MainMenu::update()
 {
 	m_entityManager.update();
+	sChangeStrings();
 	sRender();
 }
 
@@ -123,13 +135,13 @@ void Scene_MainMenu::sRender()
 		}
 
 		//render each string, highlight selected string
-		for (int i = 0; i < m_menuStrings.size(); i++)
+		for (int i = 0; i < m_currentStrings.size(); i++)
 		{
 
 			i == m_Selection ? m_text.setFillColor(m_selectionColor) : m_text.setFillColor(m_textColor);
 
 
-			m_text.setString(m_menuStrings[i]);
+			m_text.setString(m_currentStrings[i]);
 
 			sf::FloatRect textBounds = m_text.getLocalBounds();
 			m_text.setOrigin(textBounds.left + textBounds.width / 2, textBounds.top + textBounds.height / 2);
@@ -150,10 +162,23 @@ void Scene_MainMenu::sScroll(int direction)
 {
 	int newSelection = m_Selection + direction;
 	//stop from exceeding menu size
-	newSelection = std::min(int(m_menuStrings.size()) - 1, newSelection);
+	newSelection = std::min(int(m_currentStrings.size()) - 1, newSelection);
 	//stop from going below menu size
 	newSelection = std::max(0, newSelection);
 	m_Selection = newSelection;
+}
+
+void Scene_MainMenu::sChangeStrings()
+{
+	if (m_levelSelect)
+	{
+		//set strings to levels.
+		m_currentStrings = m_levelStrings;
+	}
+	else
+	{
+		m_currentStrings = m_menuStrings;
+	}
 }
 
 void Scene_MainMenu::sDoAction(const Action& action)
@@ -169,29 +194,45 @@ void Scene_MainMenu::sDoAction(const Action& action)
 void Scene_MainMenu::sSelect()
 {
 
-	std::string selection = m_menuStrings[m_Selection];
+	std::string selection = m_currentStrings[m_Selection];
 
-	if (selection == "Play")
+
+	if (m_levelSelect)
 	{
-		m_game->changeScene("GAME", std::make_shared<Scene_Play>(m_game, "tmp/Level1.txt"));
-	}
-	else if (selection == "Level Editor")
-	{
-		m_game->changeScene("LEVEL_EDITOR", std::make_shared<Scene_LevelEditor>(m_game, "tmp/Level1.txt"));
-	}
-	else if (selection == "Options")
-	{
+		if (selection == "Level 1")
+		{
+			m_game->changeScene("GAME", std::make_shared<Scene_Play>(m_game, "Level1"));
+		}
+		else if (selection == "Back")
+		{
+			m_levelSelect = false;
+			return;
+		}
+
+		std::cout << "Loading level " << selection << std::endl;
 
 	}
 	else
 	{
-		m_game->quit();
-		//quit code.
+		if (selection == "Play")
+		{
+			//Change UI to render level select.
+			m_levelSelect = true;
+		}
+		else if (selection == "Level Editor")
+		{
+			m_game->changeScene("LEVEL_EDITOR", std::make_shared<Scene_LevelEditor>(m_game, "tmp/Level1.txt"));
+		}
+		else if (selection == "Options")
+		{
+
+		}
+		else
+		{
+			m_game->quit();
+			//quit code.
+		}
 	}
-
-
-
-
 }
 
 void Scene_MainMenu::onEnd()
