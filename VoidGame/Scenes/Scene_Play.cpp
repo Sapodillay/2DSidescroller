@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "Scene_Play.h"
-#include "Scene_EndScreen.h"
+#include "Scene_MainMenu.h"
 
 #include "../Physics.h"
 #include "../GameEngine.h"
@@ -357,7 +357,7 @@ void Scene_Play::sDamage(int damage)
 
     if (health.m_health == 0)
     {
-        m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You died!"));
+        m_game->changeScene("MAIN_MENU", std::make_shared<Scene_MainMenu>(m_game, "You died!"));
     }
 }
 
@@ -385,7 +385,7 @@ void Scene_Play::sMovement()
     //if the player is under the map, reset the level.
     if (playerTransform.pos.y > m_game->window().getView().getSize().y)
     {
-        m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You died!"));
+        m_game->changeScene("END_SCREEN", std::make_shared<Scene_MainMenu>(m_game, "You died!"));
     }
 
 
@@ -636,17 +636,7 @@ void Scene_Play::sDoAction(const Action& action)
         else if (name == "TOGGLE_COLLISION") { m_drawCollision = !m_drawCollision; }
         else if (name == "RESET") 
         { 
-
-            int enemyAmount = m_entityManager.getEntities("Enemy").size();
-
-            Prompt testPrompt;
-            testPrompt.name = "There are x amount of enemies left";
-            testPrompt.timeLength = 120.0f;
-            testPrompt.location = m_player->getComponent<CTransform>().pos;
-
-            promptVec.push_back(testPrompt);
-
-
+            m_game->changeScene("MAIN_MENU", std::make_shared<Scene_MainMenu>(m_game));
         }
     }
     else if (action.getType() == "END")
@@ -1064,7 +1054,7 @@ void Scene_Play::onEnd()
 void Scene_Play::onLevelFinish()
 {
     saveScore(m_player->getComponent<CScore>().score, m_levelPath);
-    m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: " + std::to_string(int(m_player->getComponent<CScore>().score))));
+    m_game->changeScene("MAIN_MENU", std::make_shared<Scene_MainMenu>(m_game, "You finished the level \n Score: " + std::to_string(int(m_player->getComponent<CScore>().score))));
 }
 
 Vec2 Scene_Play::gridToPixel(Vec2 gridPos)

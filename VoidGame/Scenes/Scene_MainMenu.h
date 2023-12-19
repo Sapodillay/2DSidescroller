@@ -9,6 +9,8 @@ class Scene_MainMenu : public Scene
 
 public:
 	Scene_MainMenu(GameEngine* gameEngine);
+	Scene_MainMenu(GameEngine* gameEngine, std::string message);
+
 
 protected:
 	sf::Font m_menuFont;
@@ -18,6 +20,9 @@ protected:
 	sf::Color m_textColor;
 
 	bool m_levelSelect = false;
+	bool m_messageMenu = false;
+	std::string m_menuMessage;
+
 	int m_highScore = 0;
 
 	bool m_drawTextures = true;
