@@ -38,6 +38,7 @@ private:
 	void sChangeStrings();
 	void sDoAction(const Action& action);
 	void sSelect();
+	int loadScore(std::string levelName);
 	void onEnd();
 
 

@@ -3,6 +3,10 @@
 #include "Scene_LevelEditor.h"
 #include "Scene_Play.h"
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 
 Scene_MainMenu::Scene_MainMenu(GameEngine* gameEngine)
 	: Scene(gameEngine)
@@ -188,7 +192,7 @@ void Scene_MainMenu::sScroll(int direction)
 		if (m_currentStrings[m_Selection] == "Level 1")
 		{
 			//score level 1 score
-			m_highScore = 10;
+			m_highScore = loadScore("Level1");
 
 		}
 		else
@@ -248,6 +252,8 @@ void Scene_MainMenu::sSelect()
 		{
 			//Change UI to render level select.
 			m_levelSelect = true;
+			//load first level score.
+			m_highScore = loadScore("Level1");
 		}
 		else if (selection == "Level Editor")
 		{
@@ -263,6 +269,24 @@ void Scene_MainMenu::sSelect()
 			//quit code.
 		}
 	}
+}
+
+int Scene_MainMenu::loadScore(std::string levelName)
+{
+	std::ifstream configFile("levels/data/" + levelName + ".txt");
+	std::string line;
+	int score = 0;
+	if (std::getline(configFile, line))
+	{
+		std::istringstream iss(line);
+		iss >> score;
+	}
+	else
+	{
+		std::cout << "No score found for level " << levelName << "." << std::endl;
+	}
+
+	return score;
 }
 
 void Scene_MainMenu::onEnd()
