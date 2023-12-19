@@ -36,3 +36,4 @@ packages/*
 VoidGame/x64/*
 x64/*
 VoidGame/imgui.ini
+VoidGame/levels/data/*
