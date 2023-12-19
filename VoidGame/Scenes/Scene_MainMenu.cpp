@@ -14,6 +14,14 @@ Scene_MainMenu::Scene_MainMenu(GameEngine* gameEngine)
 	init();
 }
 
+Scene_MainMenu::Scene_MainMenu(GameEngine* gameEngine, std::string message)
+	: Scene(gameEngine)
+{
+	m_messageMenu = true;
+	m_menuMessage = message;
+	init();
+}
+
 void Scene_MainMenu::init()
 {
 	//set view in middle
@@ -136,6 +144,18 @@ void Scene_MainMenu::sRender()
 			}
 		}
 
+		//render menu message
+		if (m_messageMenu)
+		{
+			m_text.setString(m_menuMessage);
+			sf::FloatRect textBounds = m_text.getLocalBounds();
+			m_text.setOrigin(textBounds.left + textBounds.width / 2, textBounds.top + textBounds.height / 2);
+			m_text.setPosition(m_game->window().getView().getCenter().x, m_game->window().getView().getCenter().y);
+			m_game->window().draw(m_text);
+			m_game->window().display();
+			return;
+		}
+
 		//render each string, highlight selected string
 		for (int i = 0; i < m_currentStrings.size(); i++)
 		{
@@ -222,7 +242,17 @@ void Scene_MainMenu::sDoAction(const Action& action)
 	{
 		if (action.getName() == "UP") { sScroll(-1); }
 		else if (action.getName() == "DOWN") { sScroll(1); }
-		else if (action.getName() == "SELECT") { sSelect(); }
+		else if (action.getName() == "SELECT") 
+		{
+			if (m_messageMenu)
+			{
+				m_messageMenu = false;
+			}
+			else
+			{
+				sSelect(); 
+			}
+		}
 	}
 }
 
