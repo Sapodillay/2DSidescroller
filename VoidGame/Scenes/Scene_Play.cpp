@@ -294,7 +294,7 @@ void Scene_Play::saveScore(int score, std::string& levelName)
     {
         oldScore = 0;
     }
-    std::cout << "old score " << oldScore << " new score " << score << std::endl;
+
     // only update score if its higher than current high score.
     if (oldScore < score)
     {
@@ -376,16 +376,17 @@ void Scene_Play::sMovement()
         playerTransform.velocity = { 0.0, 0.0 };
     }
 
-
-
-
     if (m_player->getComponent<CInput>().up && playerState.jumpTimer < 2.0f && playerState.state != "Down")
     {
         playerTransform.velocity.y = -20;
         playerState.jumpTimer += 2.0f;
     }
 
-
+    //if the player is under the map, reset the level.
+    if (playerTransform.pos.y > m_game->window().getView().getSize().y)
+    {
+        m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You died!"));
+    }
 
 
     //horizontal movement
@@ -782,7 +783,7 @@ void Scene_Play::sRender()
     view.setCenter(windowCenterX + 100, m_game->window().getSize().y - view.getCenter().y);
     m_game->window().setView(view);
 
-    //drawDebug();
+    drawDebug();
 
 
     for (auto& e : m_entityManager.getEntities())
