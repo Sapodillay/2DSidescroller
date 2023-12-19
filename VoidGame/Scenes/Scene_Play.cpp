@@ -277,6 +277,15 @@ void Scene_Play::spawnBullet(std::shared_ptr<Entity> entity)
 {
 }
 
+void Scene_Play::saveScore(int score, std::string& levelName)
+{
+    std::cout << "Saving score..." << std::endl;
+
+    std::ofstream outfile("levels/data" + m_levelPath + ".txt");
+    outfile << std::to_string(score) << std::endl;
+
+
+}
 
 void Scene_Play::update()
 {
@@ -520,9 +529,7 @@ void Scene_Play::sCollision()
                 //check that player has killed all enemies
                 if (m_entityManager.getEntities("Enemy").size() == 0)
                 {
-                    m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: " + std::to_string(int(m_player->getComponent<CScore>().score))));
-                    //TODO: Save the score.
-
+                    onLevelFinish();
                 }
                 else
                 {
@@ -1035,6 +1042,12 @@ void Scene_Play::drawDebug()
 
 void Scene_Play::onEnd()
 {
+}
+
+void Scene_Play::onLevelFinish()
+{
+    saveScore(m_player->getComponent<CScore>().score, m_levelPath);
+    m_game->changeScene("END_SCREEN", std::make_shared<Scene_EndScreen>(m_game, "You finished the level \n Score: " + std::to_string(int(m_player->getComponent<CScore>().score))));
 }
 
 Vec2 Scene_Play::gridToPixel(Vec2 gridPos)

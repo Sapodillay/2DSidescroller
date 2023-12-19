@@ -52,6 +52,7 @@ private:
 	void loadLevel(std::string& filename);
 	void spawnPlayer();
 	void spawnBullet(std::shared_ptr<Entity> entity);
+	void saveScore(int score, std::string& levelName);
 	void update();
 	void sScore();
 	void sDamage(int damage);
@@ -64,6 +65,7 @@ private:
 	void sPlayerState();
 	void sRender();
 	void onEnd();
+	void onLevelFinish();
 	Vec2 gridToPixel(Vec2 gridPos);
 	Vec2 gridToMidPixel(Vec2 gridPos, std::shared_ptr<Entity> entity);
 	void drawLine(const Vec2& p1, const Vec2& p2);
