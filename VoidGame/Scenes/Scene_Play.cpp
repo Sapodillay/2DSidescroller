@@ -281,10 +281,26 @@ void Scene_Play::saveScore(int score, std::string& levelName)
 {
     std::cout << "Saving score..." << std::endl;
 
-    std::ofstream outfile("levels/data" + m_levelPath + ".txt");
-    outfile << std::to_string(score) << std::endl;
-
-
+    //check current high score.
+    std::ifstream configFile("levels/data/" + levelName + ".txt");
+    std::string line;
+    int oldScore = 0;
+    if (std::getline(configFile, line))
+    {
+        std::istringstream iss(line);
+        iss >> oldScore;
+    }
+    else
+    {
+        oldScore = 0;
+    }
+    std::cout << "old score " << oldScore << " new score " << score << std::endl;
+    // only update score if its higher than current high score.
+    if (oldScore < score)
+    {
+        std::ofstream outfile("levels/data/" + levelName + ".txt");
+        outfile << std::to_string(score) << std::endl;
+    }
 }
 
 void Scene_Play::update()
