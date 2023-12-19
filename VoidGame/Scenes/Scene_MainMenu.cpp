@@ -39,8 +39,6 @@ void Scene_MainMenu::init()
 	//Hard coded level names, C++ 14 doesn't support filesystem.
 	m_levelStrings.push_back("Level 1");
 	m_levelStrings.push_back("Level 2");
-	m_levelStrings.push_back("Level 3");
-	m_levelStrings.push_back("Level 4");
 	m_levelStrings.push_back("Back");
 
 
@@ -193,7 +191,10 @@ void Scene_MainMenu::sScroll(int direction)
 		{
 			//score level 1 score
 			m_highScore = loadScore("Level1");
-
+		}
+		else if (m_currentStrings[m_Selection] == "Level 2")
+		{
+			m_highScore = loadScore("Level2");
 		}
 		else
 		{
@@ -236,6 +237,10 @@ void Scene_MainMenu::sSelect()
 		if (selection == "Level 1")
 		{
 			m_game->changeScene("GAME", std::make_shared<Scene_Play>(m_game, "Level1"));
+		}
+		else if (selection == "Level 2")
+		{
+			m_game->changeScene("GAME", std::make_shared<Scene_Play>(m_game, "Level2"));
 		}
 		else if (selection == "Back")
 		{
