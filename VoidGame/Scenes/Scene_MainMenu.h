@@ -18,6 +18,7 @@ protected:
 	sf::Color m_textColor;
 
 	bool m_levelSelect = false;
+	int m_highScore = 0;
 
 	bool m_drawTextures = true;
 	int m_Selection = 0;

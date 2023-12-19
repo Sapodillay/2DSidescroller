@@ -145,11 +145,26 @@ void Scene_MainMenu::sRender()
 
 			sf::FloatRect textBounds = m_text.getLocalBounds();
 			m_text.setOrigin(textBounds.left + textBounds.width / 2, textBounds.top + textBounds.height / 2);
-			m_text.setPosition(m_game->window().getView().getCenter().x, m_game->window().getView().getCenter().y);
-
 			m_text.setPosition(m_game->window().getView().getCenter().x, m_game->window().getView().getCenter().y + (i * 40));
 			m_game->window().draw(m_text);
 		}
+
+		if (m_levelSelect)
+		{
+
+			m_text.setFillColor(m_textColor);
+
+			//set position to right of level select.
+			m_text.setPosition(m_game->window().getView().getCenter().x + 250, m_game->window().getView().getCenter().y);
+			//display string
+			std::string scoreString = "High score: " + std::to_string(m_highScore);
+			m_text.setString(scoreString);
+
+			m_game->window().draw(m_text);
+
+		}
+
+
 		m_game->window().display();
 	}
 
@@ -166,6 +181,21 @@ void Scene_MainMenu::sScroll(int direction)
 	//stop from going below menu size
 	newSelection = std::max(0, newSelection);
 	m_Selection = newSelection;
+
+	//load and store score when hovering over a level
+	if (m_levelSelect)
+	{
+		if (m_currentStrings[m_Selection] == "Level 1")
+		{
+			//score level 1 score
+			m_highScore = 10;
+
+		}
+		else
+		{
+			m_highScore = 0;
+		}
+	}
 }
 
 void Scene_MainMenu::sChangeStrings()
