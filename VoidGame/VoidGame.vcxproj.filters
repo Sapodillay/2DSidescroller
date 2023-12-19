@@ -72,9 +72,6 @@
     <ClCompile Include="Scenes\Scene_Play.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scenes\Scene_EndScreen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entity.h">
@@ -141,9 +138,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\Scene_Play.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scenes\Scene_EndScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
