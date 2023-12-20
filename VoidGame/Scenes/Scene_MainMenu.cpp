@@ -24,10 +24,6 @@ Scene_MainMenu::Scene_MainMenu(GameEngine* gameEngine, std::string message)
 
 void Scene_MainMenu::init()
 {
-	//set view in middle
-	sf::View view(m_game->window().getDefaultView());
-	view.setCenter(m_game->window().getDefaultView().getCenter());
-	m_game->window().setView(view);
 
 	registerAction(sf::Keyboard::W, "UP");
 	registerAction(sf::Keyboard::Up, "UP");
@@ -113,6 +109,9 @@ void Scene_MainMenu::update()
 
 void Scene_MainMenu::sRender()
 {
+	sf::View view(m_game->window().getDefaultView());
+	view.setCenter(m_game->window().getDefaultView().getCenter());
+	m_game->window().setView(view);
 
 	m_game->window().clear(sf::Color(190, 110, 230));
 
