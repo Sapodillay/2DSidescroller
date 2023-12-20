@@ -24,8 +24,6 @@ void GameEngine::init(const std::string& path)
 	m_window.setFramerateLimit(60);
 
 	changeScene("MENU", std::make_shared<Scene_MainMenu>(this));
-	//changeScene("GAME", std::make_shared<Scene_Play>(this, path));
-	//changeScene("LEVEL_EDITOR", std::make_shared<Scene_LevelEditor>(this, path));
 
 }
 

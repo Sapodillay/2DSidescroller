@@ -621,6 +621,7 @@ void Scene_Play::sDoAction(const Action& action)
     CInput& input = m_player->getComponent<CInput>();
     CPlayerState& state = m_player->getComponent<CPlayerState>();
 
+    //if key down - start event
     if (action.getType() == "START")
     {
         std::string name = action.getName();
@@ -773,8 +774,7 @@ void Scene_Play::sRender()
     view.setCenter(windowCenterX + 100, m_game->window().getSize().y - view.getCenter().y);
     m_game->window().setView(view);
 
-    drawDebug();
-
+    //drawDebug();
 
     for (auto& e : m_entityManager.getEntities())
     {
